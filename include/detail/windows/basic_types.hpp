@@ -3,7 +3,7 @@
 
 namespace jm {
 
-    using native_handle_t = void*; // HANDLE
+    using native_handle_t     = void*; // HANDLE
     using native_protection_t = unsigned long; // DWORD
 
 }

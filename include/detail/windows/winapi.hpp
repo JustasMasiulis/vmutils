@@ -17,7 +17,7 @@
 #ifndef JM_PROTECTION_WINAPI_HPP
 #define JM_PROTECTION_WINAPI_HPP
 
-namespace jm { namespace detail { namespace winapi {
+namespace vmu { namespace detail { namespace winapi {
 
 #ifndef JM_PROT_USE_CUSTOM_WINDOWS_INCLUDE
     #define NOMINMAX
@@ -29,6 +29,6 @@ namespace jm { namespace detail { namespace winapi {
     JM_PROT_USE_CUSTOM_WINDOWS_INCLUDE;
 #endif // !JM_PROT_USE_CUSTOM_WINDOWS_INCLUDE
 
-}}}
+}}} // namespace jm::detail::winapi
 
 #endif // !JM_PROTECTION_WINAPI_HPP

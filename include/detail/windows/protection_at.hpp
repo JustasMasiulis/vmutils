@@ -10,35 +10,25 @@
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
+* See the License for the specific language governing protectionand
 * limitations under the License.
 */
 
 #ifndef JM_PROTECTION_WINDOWS_PROTECTION_AT_HPP
 #define JM_PROTECTION_WINDOWS_PROTECTION_AT_HPP
 
-#include "winapi.hpp"
 #include <cstdint>
-
+#include "winapi.hpp"
 
 namespace jm { namespace detail {
 
-    inline protections_at(winapi::HANDLE handle, std::uintptr_t begin, std::uintptr_t end)
+    inline winapi::DWORD protection_at(std::uintptr_t address)
     {
-
-
-        std::vector<spm::memory::region> regions;
-        SPM_NATIVE_SUSBSYSTEM(handle, {
-            for (auto cur_addr = range.start; cur_addr < range.end;) {
-                const auto info = native.query(pointer_cast<subsystem_t::ptr>(range.start));
-                const auto begin = cur_addr;
-                cur_addr += info.RegionSize;
-
-                regions.emplace_back(begin, cur_addr, info.Protect);
-            }
-        });
-
-        return regions;
+        winapi::MEMORY_BASIC_INFORMATION info;
+        if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
+            , &info
+            , sizeof(info)) == 0)
+            throw std::system_error();
     }
 
 }}

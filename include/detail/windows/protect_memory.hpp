@@ -21,7 +21,9 @@
 #include <system_error>
 #include "winapi.hpp"
 
-namespace jm { namespace detail {
+namespace vmu { namespace detail {
+
+    using native_protection_t = winapi::DWORD;
 
     inline void protect_memory(std::uintptr_t begin
                                , std::uintptr_t end

@@ -1,32 +1,21 @@
-#ifndef JM_PROTECTION_GUARD_HPP
-#define JM_PROTECTION_GUARD_HPP
+#ifndef VMU_PROTECTION_GUARD_HPP
+#define VMU_PROTECTION_GUARD_HPP
 
 #include <cstdint>
 
-namespace jm {
-
-    enum class protection
-    {
-        none            = 0,
-        read            = 1,
-        write           = 2,
-        read_write      = 3,
-        exec            = 4,
-        read_exec       = 5,
-        write_exec      = 6,
-        read_write_exec = 7
-    };
-
-
+namespace vmu {
 
     class protection_guard
     {
         
     public:
-        template<typename Ptr>
-        protection_guard(Ptr begin, Ptr end, protection prot);
+        protection_guard(std::uintptr_t begin, std::uintptr_t end, protection prot);
+
+        template<typename Range>
+        protection_guard(const Range& r, protection prot);
+
     };
 
 }
 
-#endif // !JM_PROTECTION_GUARD_HPP
+#endif // !VMU_PROTECTION_GUARD_HPP
