@@ -47,4 +47,10 @@ namespace vmu {
 
 } // namespace vmu
 
+#if defined(VMU_WINDOWS)
+    #include "detail/windows/protect.inl"
+#else
+    #include "detail/posix/protect.inl"
+#endif
+
 #endif // !VMU_PROTECT_MEMORY_HPP
