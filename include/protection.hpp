@@ -23,9 +23,10 @@ namespace protection {
     };
 
 
-    inline native_protection_t to_native(flags flags);
+    constexpr inline native_protection_t to_native(flags flags);
 
-    inline flags from_native(native_protection_t flags);
+
+    constexpr inline flags from_native(native_protection_t flags);
 
 
     class storage
@@ -33,17 +34,16 @@ namespace protection {
         native_protection_t _native;
 
     public:
-        bool accessible() const noexcept;
-        bool readable() const noexcept;
-        bool writable() const noexcept;
-        bool executable() const noexcept;
-
+        constexpr bool accessible() const noexcept;
+        constexpr bool readable() const noexcept;
+        constexpr bool writable() const noexcept;
+        constexpr bool executable() const noexcept;
         
-        native_protection_t native() const noexcept { return _native; }
-        flags to_flags() const;
+        constexpr native_protection_t native() const noexcept { return _native; }
+        constexpr flags to_flags() const { return from_native(_native); }
 
-        operator const native_protection_t&() const noexcept { return _native; }
-        operator native_protection_t&() noexcept { return _native; }
+        constexpr operator const native_protection_t&() const noexcept { return _native; }
+        constexpr operator native_protection_t&() noexcept { return _native; }
     };
 
 

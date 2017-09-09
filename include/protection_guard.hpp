@@ -2,6 +2,7 @@
 #define VMU_PROTECTION_GUARD_HPP
 
 #include "protection.hpp"
+#include <cstdint>
 
 namespace vmu {
 
