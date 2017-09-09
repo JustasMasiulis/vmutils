@@ -9,6 +9,13 @@ namespace vmu {
     template<typename Ptr>
     struct basic_region
     {
+        constexpr basic_region() noexcept
+            : begin(0)
+            , end(0)
+            , prot(0)
+            , shared(false)
+            , in_use(false) {}
+
         Ptr                 begin;
         Ptr                 end;
         protection::storage prot;

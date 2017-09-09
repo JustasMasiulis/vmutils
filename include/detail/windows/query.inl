@@ -24,7 +24,7 @@ namespace vmu {
             , (info.Type & winapi::MEM_PRIVATE) == 0 // shared
             , info.State != MEM_FREE }; // in_use
     }
-    inline local_region query(std::uintptr_t address, std::error_code& ec) noexcept
+    inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
         detail::winapi::MEMORY_BASIC_INFORMATION info;
         if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
@@ -43,7 +43,7 @@ namespace vmu {
             , info.State != MEM_FREE }; // in_use
     }
 
-    inline std::vector<local_region> query(std::uintptr_t begin, std::uintptr_t end)
+    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
     {
         std::vector<local_region> regions;
         while (begin < end) {
@@ -53,7 +53,7 @@ namespace vmu {
 
         return regions;
     }
-    inline std::vector<local_region> query(std::uintptr_t begin
+    inline std::vector<local_region> query_range(std::uintptr_t begin
                                            , std::uintptr_t end
                                            , std::error_code& ec)
     {
@@ -71,23 +71,28 @@ namespace vmu {
 
 
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uintptr_t address)
+    inline remote_region query(const Handle& handle, std::uint64_t address)
     {
         throw std::logic_error("not implemented");
     }
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uintptr_t address, std::error_code& ec) noexcept
+    inline remote_region query(const Handle& handle, std::uint64_t address, std::error_code& ec)
     {
         throw std::logic_error("not implemented");
     }
 
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uintptr_t begin, std::uintptr_t end)
+    inline std::vector<remote_region> query_range(const Handle& handle
+                                                  , std::uint64_t begin
+                                                  , std::uint64_t end)
     {
         throw std::logic_error("not implemented");
     }
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uintptr_t begin, std::uintptr_t end, std::error_code& ec) noexcept
+    inline std::vector<remote_region> query_range(const Handle& handle
+                                                  , std::uint64_t begin
+                                                  , std::uint64_t end
+                                                  , std::error_code& ec)
     {
         throw std::logic_error("not implemented");
     }
