@@ -34,6 +34,12 @@ namespace protection {
         native_protection_t _native;
 
     public:
+        constexpr storage(flags flags)
+            : _native(to_native(flags)) {}
+
+        constexpr storage(native_protection_t native) noexcept
+            : _native(native) {}
+
         constexpr bool accessible() const noexcept;
         constexpr bool readable() const noexcept;
         constexpr bool writable() const noexcept;
@@ -95,5 +101,11 @@ namespace protection {
     }
 
 }}
+
+#ifdef VMU_WINDOWS
+    #include "detail/windows/protection.inl"
+#else
+    #include "detail/posix/protection.inl"
+#endif
 
 #endif // !VMU_PROTECTION_HPP

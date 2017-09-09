@@ -2,11 +2,11 @@
 #define JM_PROTECTION_GUARD_CONFIG_HPP
 
 #if defined(_WIN32)
-    #define JM_PG_WINDOWS
+    #define VMU_WINDOWS
 #elif defined(__linux__)
-    #define JM_PG_LINUX
+    #define VMU_LINUX
 #elif defined(__apple__)
-    #define JM_PG_APPLE
+    #define VMU_OSX
 #else
     #error unsupported architecture
 #endif 

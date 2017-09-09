@@ -1,3 +1,6 @@
+#ifndef VMU_QUERY_HPP
+#define VMU_QUERY_HPP
+
 #include "region.hpp"
 #include <system_error>
 
@@ -20,3 +23,13 @@ namespace vmu {
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uintptr_t begin, std::uintptr_t end, std::error_code& ec) noexcept;
 }
+
+#if defined(VMU_WINDOWS)
+    #include "detail/windows/query.inl"
+#elif defined(VMU_LINUX)
+    #include "detail/linux/query.inl"
+#else
+    #include "detail/osx/query.inl"
+#endif
+
+#endif // !VMU_QUERY_HPP

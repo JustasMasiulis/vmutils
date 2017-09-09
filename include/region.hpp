@@ -1,6 +1,7 @@
 #ifndef VMU_REGION_HPP
 #define VMU_REGION_HPP
 
+#include <cstdint>
 #include "protection.hpp"
 
 namespace vmu {
@@ -13,8 +14,15 @@ namespace vmu {
         protection::storage prot;
         bool                shared;
 
-        Ptr size() const noexcept { return end - begin; }
-        bool guarded() const noexcept { return }
+        constexpr Ptr size() const noexcept { return end - begin; }
+        constexpr bool guarded() const noexcept 
+        {
+#ifdef VMU_WINDOWS
+            return (prot.native() & PAGE_GUARD);
+#else
+            return false;
+#endif
+        }
     };
 
 
