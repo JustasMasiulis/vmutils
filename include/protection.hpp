@@ -1,17 +1,18 @@
-#ifndef JM_PROTECTION_PROTECTION_HPP
-#define JM_PROTECTION_PROTECTION_HPP
+#ifndef VMU_PROTECTION_HPP
+#define VMU_PROTECTION_HPP
 
 #include "detail/config.hpp"
 
-#if defined(JM_PG_WINDOWS)
-#include "detail/windows/basic_types.hpp"
-#include "detail/windows/protection_at.hpp"
-#elif defined(JM_PG_LINUX)
-#define 
-#elif defined(JM_PG_APPLE)
-#endif
+namespace vmu { 
 
-namespace vmu { namespace protection {
+#ifdef VMU_WINDOWS
+    using native_protection_t = unsigned long;
+#else
+    using native_protection_t = int;
+#endif
+    
+namespace protection {
+
 
     enum class flags : native_protection_t
     {
@@ -22,28 +23,25 @@ namespace vmu { namespace protection {
     };
 
 
-    native_protection_t to_native(flags flags)
-    {
+    inline native_protection_t to_native(flags flags);
 
-    }
+    inline flags from_native(native_protection_t flags);
 
-    flags to_flags(native_protection_t flags)
-    {
 
-    }
-
-    struct storage
+    class storage
     {
         native_protection_t _native;
 
     public:
-        bool accessible();
-        bool readable();
-        bool writable();
-        bool executable();
+        bool accessible() const noexcept;
+        bool readable() const noexcept;
+        bool writable() const noexcept;
+        bool executable() const noexcept;
 
         
-        native_protection_t native() { return _native; }
+        native_protection_t native() const noexcept { return _native; }
+        flags to_flags() const;
+
         operator const native_protection_t&() const noexcept { return _native; }
         operator native_protection_t&() noexcept { return _native; }
     };
@@ -98,4 +96,4 @@ namespace vmu { namespace protection {
 
 }}
 
-#endif // !JM_PROTECTION_PROTECTION_HPP
+#endif // !VMU_PROTECTION_HPP
