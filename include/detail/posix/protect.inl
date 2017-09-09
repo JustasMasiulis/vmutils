@@ -14,43 +14,41 @@
 * limitations under the License.
 */
 
-#ifndef JM_PROTECTION_POSIX_PROTECT_MEMORY_HPP
-#define JM_PROTECTION_POSIX_PROTECT_MEMORY_HPP
+#ifndef VMU_POSIX_PROTECT_MEMORY_INL
+#define VMU_POSIX_PROTECT_MEMORY_INL
 
-#include <cstdint>
+#include "../../protect.hpp"
 #include <system_error>
 #include <unistd.h>
 #include <sys/mman.h>
 
-namespace jm { namespace detail {
+namespace vmu {
 
-    using native_protection_t = int;
-
-    inline void protect_memory(std::uintptr_t begin
-                               , std::uintptr_t end
-                               , native_protection_t native_prot)
+    inline void protect(std::uintptr_t begin
+                        , std::uintptr_t end
+                        , protection::storage prot)
     {
         static const auto page_size = ::sysconf(_SC_PAGESIZE);
         const auto address = (begin & -page_size);
 
-        if(::mprotect(reinterpret_cast<void*>(address), end - begin, native_prot) == -1)
+        if (::mprotect(reinterpret_cast<void*>(address), end - begin, prot.native()) == -1)
             throw std::system_error(std::error_code(errno, std::system_category())
                                     , "mprotect() failed");
     }
 
 
-    inline void protect_memory(std::uintptr_t begin
-                               , std::uintptr_t end
-                               , native_protection_t native_prot
-                               , std::error_code& ec) noexcept
+    inline void protect(std::uintptr_t begin
+                        , std::uintptr_t end
+                        , protection::storage prot
+                        , std::error_code& ec) noexcept
     {
         static const auto page_size = ::sysconf(_SC_PAGESIZE);
         const auto address = (begin & -page_size);
 
-        if (::mprotect(reinterpret_cast<void*>(address), end - begin, native_prot) == -1)
+        if (::mprotect(reinterpret_cast<void*>(address), end - begin, prot.native()) == -1)
             ec = std::error_code(errno, std::system_category());
     }
 
-}} // namespace jm::detail
+} // namespace vmu
 
-#endif // !JM_PROTECTION_POSIX_PROTECT_MEMORY_HPP
+#endif // !VMU_POSIX_PROTECT_MEMORY_INL

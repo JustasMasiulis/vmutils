@@ -1,41 +1,96 @@
 #ifndef VMU_WINDOWS_QUERY_INL
 #define VMU_WINDOWS_QUERY_INL
 
-#include "winapi.hpp"
+#include "error.hpp"
 #include "../../query.hpp"
 
 namespace vmu {
 
     inline local_region query(std::uintptr_t address)
     {
-        winapi::MEMORY_BASIC_INFORMATION info;
-        if(winapi::VirtualQuery(reinterpret_cast<const void*>(address)
-           , &info
-           , sizeof(info) == 0)
-           throw std::system_error
+        detail::winapi::MEMORY_BASIC_INFORMATION info;
+        if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
+            , &info
+            , sizeof(info)) == 0)
+            detail::throw_last_error("VirtualQuery() failed");
+
+        if (info.State == MEM_RESERVE)
+            info.Protect = PAGE_NOACCESS;
+
+        const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
+        return local_region{ base // begin
+            , base + info.RegionSize // end
+            , info.Protect // prot
+            , (info.Type & winapi::MEM_PRIVATE) == 0 // shared
+            , info.State != MEM_FREE }; // in_use
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec) noexcept
-    {}
+    {
+        detail::winapi::MEMORY_BASIC_INFORMATION info;
+        if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
+            , &info
+            , sizeof(info)) == 0)
+            ec = detail::get_last_error();
 
-    inline local_region query(std::uintptr_t begin, std::uintptr_t end)
-    {}
-    inline local_region query(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec) noexcept
-    {}
+        if (info.State == MEM_RESERVE)
+            info.Protect = PAGE_NOACCESS;
+
+        const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
+        return local_region{ base // begin
+            , base + info.RegionSize // end
+            , info.Protect // prot
+            , (info.Type & winapi::MEM_PRIVATE) == 0 // shared
+            , info.State != MEM_FREE }; // in_use
+    }
+
+    inline std::vector<local_region> query(std::uintptr_t begin, std::uintptr_t end)
+    {
+        std::vector<local_region> regions;
+        while (begin < end) {
+            regions.emplace_back(query(begin));
+            begin = regions.back().end;
+        }
+
+        return regions;
+    }
+    inline std::vector<local_region> query(std::uintptr_t begin
+                                           , std::uintptr_t end
+                                           , std::error_code& ec)
+    {
+        std::vector<local_region> regions;
+        while (begin < end) {
+            regions.emplace_back(query(begin, ec));
+            if (ec)
+                return regions;
+
+            begin = regions.back().end;
+        }
+
+        return regions;
+    }
 
 
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uintptr_t address)
-    {}
+    {
+        throw std::logic_error("not implemented");
+    }
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uintptr_t address, std::error_code& ec) noexcept
-    {}
+    {
+        throw std::logic_error("not implemented");
+    }
 
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uintptr_t begin, std::uintptr_t end)
-    {}
+    {
+        throw std::logic_error("not implemented");
+    }
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uintptr_t begin, std::uintptr_t end, std::error_code& ec) noexcept
-    {}
+    {
+        throw std::logic_error("not implemented");
+    }
 }
 
 #endif // !VMU_WINDOWS_QUERY_INL

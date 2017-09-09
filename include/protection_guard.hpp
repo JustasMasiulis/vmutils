@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cstdint>
-#include "protection.hpp"
+#include "query.hpp"
 
 namespace vmu {
 
@@ -18,7 +18,16 @@ namespace vmu {
 
         std::vector<old_prot_storage> _old;
     public:
-        protection_guard(std::uintptr_t begin, std::uintptr_t end, protection::storage prot);
+        protection_guard(std::uintptr_t begin, std::uintptr_t end, protection::storage prot)
+        {
+            auto regions = query(begin, end);
+            for (auto& region : regions) {
+                if (!region)
+                    throw std::runtime_error("attempt to protect free memory");
+
+                _old.emplace_back(region.begin, region.end, region.prot);
+            }
+        }
 
         template<typename Range>
         protection_guard(const Range& r, protection::storage prot);

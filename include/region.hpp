@@ -13,6 +13,7 @@ namespace vmu {
         Ptr                 end;
         protection::storage prot;
         bool                shared;
+        bool                in_use; // not free
 
         constexpr Ptr size() const noexcept { return end - begin; }
         constexpr bool guarded() const noexcept 
@@ -23,6 +24,7 @@ namespace vmu {
             return false;
 #endif
         }
+        constexpr operator bool() const noexcept { return in_use; }
     };
 
 

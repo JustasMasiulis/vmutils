@@ -1,16 +1,17 @@
 #ifndef VMU_QUERY_HPP
 #define VMU_QUERY_HPP
 
-#include "region.hpp"
+#include <vector>
 #include <system_error>
+#include "region.hpp"
 
 namespace vmu {
 
     inline local_region query(std::uintptr_t address);
     inline local_region query(std::uintptr_t address, std::error_code& ec) noexcept;
 
-    inline local_region query(std::uintptr_t begin, std::uintptr_t end);
-    inline local_region query(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec) noexcept;
+    inline std::vector<local_region> query(std::uintptr_t begin, std::uintptr_t end);
+    inline std::vector<local_region> query(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec);
 
 
     template<typename Handle>
