@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#ifndef JM_PROTECTION_WINAPI_HPP
-#define JM_PROTECTION_WINAPI_HPP
+#ifndef VMU_WINAPI_HPP
+#define VMU_WINAPI_HPP
 
 namespace vmu { namespace detail { namespace winapi {
 
@@ -29,6 +29,6 @@ namespace vmu { namespace detail { namespace winapi {
     JM_PROT_USE_CUSTOM_WINDOWS_INCLUDE;
 #endif // !JM_PROT_USE_CUSTOM_WINDOWS_INCLUDE
 
-}}} // namespace jm::detail::winapi
+}}} // namespace vmu::detail::winapi
 
-#endif // !JM_PROTECTION_WINAPI_HPP
+#endif // !VMU_WINAPI_HPP
