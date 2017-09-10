@@ -30,23 +30,17 @@ namespace vmu {
             , end(0)
             , prot(0)
             , shared(false)
+            , guarded(false)
             , in_use(false) {}
 
         Ptr                 begin;
         Ptr                 end;
         protection::storage prot;
         bool                shared;
-        bool                in_use; // not free
+        bool                guarded;
+        bool                in_use;
 
         constexpr Ptr size() const noexcept { return end - begin; }
-        constexpr bool guarded() const noexcept 
-        {
-#ifdef VMU_WINDOWS
-            return (prot.native() & PAGE_GUARD);
-#else
-            return false;
-#endif
-        }
         constexpr operator bool() const noexcept { return in_use; }
     };
 
