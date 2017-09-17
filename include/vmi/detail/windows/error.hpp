@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#ifndef VMU_WINDOWS_ERROR_HPP
-#define VMU_WINDOWS_ERROR_HPP
+#ifndef VMI_WINDOWS_ERROR_HPP
+#define VMI_WINDOWS_ERROR_HPP
 
 #include <system_error>
 #include "winapi.hpp"
@@ -35,4 +35,4 @@ namespace vmu { namespace detail {
 
 }}
 
-#endif // !VMU_WINDOWS_ERROR_HPP
+#endif // include guard

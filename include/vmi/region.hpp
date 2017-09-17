@@ -14,34 +14,38 @@
 * limitations under the License.
 */
 
-#ifndef VMU_REGION_HPP
-#define VMU_REGION_HPP
+#ifndef VMI_REGION_HPP
+#define VMI_REGION_HPP
 
 #include <cstdint>
 #include "protection.hpp"
 
 namespace vmu {
 
+    /// \brief The class representing memory region
+    /// \tparam Ptr The type representing pointer in address space
     template<typename Ptr>
-    struct basic_region
-    {
+    struct basic_region {
         constexpr basic_region() noexcept
-            : begin(0)
-            , end(0)
-            , prot(0)
-            , shared(false)
-            , guarded(false)
-            , in_use(false) {}
+                : base_address(0)
+                , size(0)
+                , prot(0)
+                , shared(false)
+                , guarded(false)
+                , in_use(false) {}
 
-        Ptr                 begin;
-        Ptr                 end;
+        Ptr                 base_address;
+        Ptr                 size;
         protection::storage prot;
         bool                shared;
         bool                guarded;
         bool                in_use;
 
-        constexpr Ptr size() const noexcept { return end - begin; }
-        constexpr operator bool() const noexcept { return in_use; }
+        constexpr Ptr begin() const noexcept { return base_address; }
+
+        constexpr Ptr end() const noexcept { return base_address + size; }
+
+        constexpr explicit operator bool() const noexcept { return in_use; }
     };
 
 
@@ -50,4 +54,4 @@ namespace vmu {
 
 }
 
-#endif // !VMU_REGION_HPP
+#endif // include guard

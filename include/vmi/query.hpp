@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#ifndef VMU_QUERY_HPP
-#define VMU_QUERY_HPP
+#ifndef VMI_QUERY_HPP
+#define VMI_QUERY_HPP
 
 #include <vector>
 #include <system_error>
@@ -54,7 +54,7 @@ namespace vmu {
 #elif defined(VMU_LINUX)
     #include "detail/linux/query.inl"
 #else
-    #include "detail/osx/query.inl"
+    #include "../detail/osx/query.inl"
 #endif
 
-#endif // !VMU_QUERY_HPP
+#endif // include guard

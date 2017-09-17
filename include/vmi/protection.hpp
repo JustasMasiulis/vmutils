@@ -14,10 +14,10 @@
 * limitations under the License.
 */
 
-#ifndef VMU_PROTECTION_HPP
-#define VMU_PROTECTION_HPP
+#ifndef VMI_PROTECTION_HPP
+#define VMI_PROTECTION_HPP
 
-#include "detail/config.hpp"
+#include "../detail/config.hpp"
 
 namespace vmu { 
 
@@ -118,10 +118,10 @@ namespace protection {
 
 }}
 
-#ifdef VMU_WINDOWS
+#ifdef VMI_PROTECTION_HPP
     #include "detail/windows/protection.inl"
 #else
-    #include "detail/posix/protection.inl"
+    #include "../detail/posix/protection.inl"
 #endif
 
 #endif // !VMU_PROTECTION_HPP

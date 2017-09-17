@@ -14,15 +14,15 @@
 * limitations under the License.
 */
 
-#ifndef VMU_WINDOWS_PROTECTION_INL
-#define VMU_WINDOWS_PROTECTION_INL
+#ifndef VMI_WINDOWS_PROTECTION_INL
+#define VMI_WINDOWS_PROTECTION_INL
 
 #include "../../protection.hpp"
 #include "winapi.hpp"
 #include <stdexcept>
 #include <string>
 
-namespace vmu { namespace protection {
+namespace vmi { namespace protection {
 
     constexpr inline native_protection_t to_native(flags flags)
     {
@@ -44,7 +44,7 @@ namespace vmu { namespace protection {
         case flags::read | flags::write | flags::exec:
             return PAGE_EXECUTE_READWRITE;
         default:
-            throw std::logic_error("unknow protection flags combination");
+            throw std::logic_error("unknown protection flags combination");
         }
     }
 
@@ -103,6 +103,6 @@ namespace vmu { namespace protection {
                 || (_native & PAGE_EXECUTE_WRITECOPY));
     }
 
-}} // namespace vmu::protection
+}} // namespace vmi::protection
 
-#endif // !VMU_WINDOWS_PROTECTION_INL
+#endif // include guard
