@@ -18,7 +18,6 @@
 #define VMI_WINDOWS_PROTECTION_INL
 
 #include "../../protection.hpp"
-#include "winapi.hpp"
 #include <stdexcept>
 #include <string>
 

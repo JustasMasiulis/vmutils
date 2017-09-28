@@ -37,7 +37,7 @@ namespace vmu {
         return local_region{ base // begin
             , base + info.RegionSize // end
             , info.Protect // prot
-            , (info.Type & winapi::MEM_PRIVATE) == 0 // shared
+            , (info.Type & MEM_PRIVATE) == 0 // shared
             , info.State != MEM_FREE }; // in_use
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
@@ -55,7 +55,7 @@ namespace vmu {
         return local_region{ base // begin
             , base + info.RegionSize // end
             , info.Protect // prot
-            , (info.Type & winapi::MEM_PRIVATE) == 0 // shared
+            , (info.Type & MEM_PRIVATE) == 0 // shared
             , info.State != MEM_FREE }; // in_use
     }
 

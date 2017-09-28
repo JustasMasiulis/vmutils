@@ -18,7 +18,6 @@
 #define VMI_WINDOWS_ERROR_HPP
 
 #include <system_error>
-#include "winapi.hpp"
 
 namespace vmu { namespace detail {
 

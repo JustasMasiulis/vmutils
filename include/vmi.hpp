@@ -3,6 +3,6 @@
 
 #include "vmi/protection.hpp"
 #include "vmi/query.hpp"
-#include "vmi/region.hpp
+#include "vmi/region.hpp"
 
 #endif // include guard

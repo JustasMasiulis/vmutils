@@ -49,12 +49,12 @@ namespace vmu {
                                                   , std::error_code& ec);
 }
 
-#if defined(VMU_WINDOWS)
+#if defined(_WIN32)
     #include "detail/windows/query.inl"
-#elif defined(VMU_LINUX)
+#elif defined(__linux__)
     #include "detail/linux/query.inl"
 #else
-    #include "../detail/osx/query.inl"
+    #include "detail/osx/query.inl"
 #endif
 
 #endif // include guard
