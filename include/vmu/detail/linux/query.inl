@@ -33,9 +33,8 @@ namespace vmu { namespace detail {
     inline basic_region<Ptr> query_impl(std::ifstream& maps, Ptr address)
     {
         char             prot[4];
-        std::string      str;
-        Ptr              prev_end;
-        Ptr              prev_begin;
+        Ptr              prev_end   = 0;
+        Ptr              prev_begin = 0;
         for (std::string str; maps; maps.ignore(INT32_MAX, '\n')) {
             std::getline(maps, str, '-');
             const auto begin_addr = stoull(str, nullptr, 16);
@@ -46,9 +45,7 @@ namespace vmu { namespace detail {
 
                 if (end_addr >= address) {
                     maps.read(prot, 4);
-
-                    return remote_region{begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-'
-                                         , false, true};
+                    return {begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-', false, true};
                 }
                 else
                     prev_end = end_addr;
@@ -57,7 +54,7 @@ namespace vmu { namespace detail {
                 prev_begin = begin_addr;
         }
 
-        return remote_region{prev_end, prev_begin - prev_end, 0, false, false, false};
+        return {prev_end, prev_begin - prev_end, 0, false, false, false};
     }
 
     template<typename Ptr>
@@ -78,14 +75,15 @@ namespace vmu { namespace detail {
             begin = end_addr;
 
             // free memory
-            if (!regions.empty() && regions.back().end != begin_addr)
+            if (!regions.empty() && regions.back().end() != begin_addr)
                 regions.emplace_back(regions.back().end()
                                      , begin_addr - regions.back().end()
                                      , protection::storage(0)
                                      , false
+                                     , false
                                      , false);
-            maps.read(prot, 4);
 
+            maps.read(prot, 4);
             regions.emplace_back(begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-', false, true);
         }
 
