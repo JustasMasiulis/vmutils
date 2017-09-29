@@ -22,100 +22,88 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace vmu {
+namespace vmu { namespace detail {
 
-    namespace detail 
+    inline vmu::protection::storage transform_prot(char prot[4]) noexcept
     {
-        
-        template<typename Ptr>
-        inline basic_region<Ptr> query_impl(std::ifstream& maps, Ptr address)
-        {
-            char prot[4];
-            std::string str;
-            Ptr prev_end;
-            Ptr prev_begin;
-            for (std::string str; maps; maps.ignore(INT32_MAX, '\n')) {
-                std::getline(maps, str, '-');
-                const auto begin_addr = stoull(str, nullptr, 16);
+        return {(prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)};
+    }
 
-                if (begin_addr <= address) {
-                    std::getline(maps, str, ' ');
-                    const auto end_addr = stoull(str, nullptr, 16);
+    template<typename Ptr>
+    inline basic_region<Ptr> query_impl(std::ifstream& maps, Ptr address)
+    {
+        char             prot[4];
+        std::string      str;
+        Ptr              prev_end;
+        Ptr              prev_begin;
+        for (std::string str; maps; maps.ignore(INT32_MAX, '\n')) {
+            std::getline(maps, str, '-');
+            const auto begin_addr = stoull(str, nullptr, 16);
 
-                    if (end_addr >= address) {
-                        maps.read(prot, 4);
+            if (begin_addr <= address) {
+                std::getline(maps, str, ' ');
+                const auto end_addr = stoull(str, nullptr, 16);
 
-                        return remote_region{ begin_addr
-                            , end_addr
-                            , (prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)
-                            , prot[3] != '-'
-                            , true };
+                if (end_addr >= address) {
+                    maps.read(prot, 4);
 
-                    }
-                    else
-                        prev_end = end_addr;
+                    return remote_region{begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-'
+                                         , false, true};
                 }
                 else
-                    prev_begin = begin_addr;
+                    prev_end = end_addr;
             }
-
-            return remote_region{ prev_end
-                , prev_begin
-                , 0
-                , false
-                , false };
-        }
-    
-        template<typename Ptr>
-        inline std::vector<basic_region<Ptr>> query_range_impl(std::ifstream& maps, Ptr begin, Ptr end)
-        {
-            std::vector<remote_region> regions;
-            char prot[4];
-            for (std::string buf; maps && begin < end; maps.ignore(INT32_MAX, '\n')) {
-                std::getline(maps, buf, '-');
-
-                const auto begin_addr = stoull(buf, nullptr, 16);
-                if (begin_addr < begin)
-                    continue;
-
-                std::getline(maps, buf, ' ');
-
-                const auto end_addr = stoull(buf, nullptr, 16);
-                begin = end_addr;
-
-                maps.read(prot, 4);
-                const protection::storage protection{ (prot[0] != '-')
-                    | ((prot[1] != '-') * 2)
-                    | ((prot[2] != '-') * 4) };
-
-                // free memory
-                if (!regions.empty() && regions.back().end != begin_addr)
-                    regions.emplace_back(regions.back().end
-                                         , begin_addr
-                                         , protection::storage(0)
-                                         , false
-                                         , false);
-
-                regions.emplace_back(begin_addr
-                                     , end_addr
-                                     , protection
-                                     , prot[3] != '-'
-                                     , true);
-            }
-
-            return regions;
+            else
+                prev_begin = begin_addr;
         }
 
-        inline std::ifstream open_maps(int pid)
-        {
-            std::ifstream maps("/proc/" + std::to_string(pid) + "/maps");
-            if (!maps.is_open())
-                throw std::runtime_error("failed to open proc/<pid>/maps");
-
-            return maps;
-        }
-
+        return remote_region{prev_end, prev_begin - prev_end, 0, false, false, false};
     }
+
+    template<typename Ptr>
+    inline std::vector<basic_region<Ptr>> query_range_impl(std::ifstream& maps, Ptr begin, Ptr end)
+    {
+        std::vector<remote_region> regions;
+        char                       prot[4];
+        for (std::string           buf; maps && begin < end; maps.ignore(INT32_MAX, '\n')) {
+            std::getline(maps, buf, '-');
+
+            const auto begin_addr = stoull(buf, nullptr, 16);
+            if (begin_addr < begin)
+                continue;
+
+            std::getline(maps, buf, ' ');
+
+            const auto end_addr = stoull(buf, nullptr, 16);
+            begin = end_addr;
+
+            // free memory
+            if (!regions.empty() && regions.back().end != begin_addr)
+                regions.emplace_back(regions.back().end()
+                                     , begin_addr - regions.back().end()
+                                     , protection::storage(0)
+                                     , false
+                                     , false);
+            maps.read(prot, 4);
+
+            regions.emplace_back(begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-', false, true);
+        }
+
+        return regions;
+    }
+
+    inline std::ifstream open_maps(int pid)
+    {
+        std::ifstream maps("/proc/" + std::to_string(pid) + "/maps");
+        if (!maps.is_open())
+            throw std::runtime_error("failed to open proc/<pid>/maps");
+
+        return maps;
+    }
+
+}}
+
+namespace vmu {
 
     inline local_region query(std::uintptr_t address)
     {
@@ -140,9 +128,7 @@ namespace vmu {
 
         return detail::query_range_impl<std::uintptr_t>(maps, begin, end);
     }
-    inline std::vector<local_region> query_range(std::uintptr_t begin
-                                           , std::uintptr_t end
-                                           , std::error_code& ec)
+    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(::getpid()) + "/maps");
         if (!maps.is_open()) {
@@ -174,19 +160,15 @@ namespace vmu {
     }
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end)
+    inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
     {
         auto maps = detail::open_maps(handle);
 
         return detail::query_range_impl<std::uint64_t>(maps, begin, end);
     }
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec)
+    inline std::vector<remote_region>
+    query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
