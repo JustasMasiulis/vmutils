@@ -34,6 +34,15 @@ namespace vmu {
                 , guarded(false)
                 , in_use(false) {}
 
+        constexpr basic_region(Ptr base_, Ptr size_, protection::storage protection, bool shared_, bool guarded_
+                               , bool in_use_) noexcept
+                : base_address(base_)
+                , size(size_)
+                , prot(protection)
+                , shared(shared_)
+                , guarded(guarded_)
+                , in_use(in_use_) {}
+
         Ptr                 base_address;
         Ptr                 size;
         protection::storage prot;

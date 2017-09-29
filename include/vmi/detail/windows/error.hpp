@@ -18,13 +18,13 @@
 #define VMI_WINDOWS_ERROR_HPP
 
 #include <system_error>
+#include "definitions.hpp"
 
 namespace vmu { namespace detail {
 
     inline std::error_code get_last_error() noexcept
     {
-        return std::error_code(static_cast<int>(winapi::GetLastError())
-                               , std::system_category());
+        return std::error_code(static_cast<int>(GetLastError()), std::system_category());
     }
 
     inline void throw_last_error(const char* msg)

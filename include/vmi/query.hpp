@@ -23,6 +23,8 @@
 
 namespace vmu {
 
+    // TODO replace addresses with templates so you can pass both pointers and integers with checking
+
     inline local_region query(std::uintptr_t address);
     inline local_region query(std::uintptr_t address, std::error_code& ec);
 
@@ -51,10 +53,10 @@ namespace vmu {
 
 #if defined(_WIN32)
     #include "detail/windows/query.inl"
-#elif defined(__linux__)
-    #include "detail/linux/query.inl"
-#else
+#elif defined(__APPLE__)
     #include "detail/osx/query.inl"
+#else
+    #include "detail/linux/query.inl"
 #endif
 
 #endif // include guard

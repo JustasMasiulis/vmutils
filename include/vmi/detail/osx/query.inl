@@ -39,7 +39,7 @@ namespace vmu {
                                          &object_name);
 
         if (kr != KERN_SUCCESS)
-            throw std::system_error(std::error_code(kr, std::system_category()), ::mach_error_string(kr));
+            throw std::system_error(std::error_code(kr, std::system_category()), "mach_vm_region() failed");
 
         if (region_base > address)
             return local_region{ address, static_cast<std::uintptr_t>(region_base), protection::storage(0), false, false, false };

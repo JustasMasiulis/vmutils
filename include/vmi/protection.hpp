@@ -14,12 +14,12 @@
 * limitations under the License.
 */
 
-#ifndef VMI_PROTECTION_HPP
-#define VMI_PROTECTION_HPP
+#ifndef VMU_PROTECTION_HPP
+#define VMU_PROTECTION_HPP
 
 namespace vmu {
 
-#ifdef _WIN32
+#if defined(_WIN32)
     using native_protection_t = unsigned long;
 #else
     using native_protection_t = int;

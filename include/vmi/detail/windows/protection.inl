@@ -14,14 +14,14 @@
 * limitations under the License.
 */
 
-#ifndef VMI_WINDOWS_PROTECTION_INL
-#define VMI_WINDOWS_PROTECTION_INL
+#ifndef VMU_WINDOWS_PROTECTION_INL
+#define VMU_WINDOWS_PROTECTION_INL
 
 #include "../../protection.hpp"
 #include <stdexcept>
 #include <string>
 
-namespace vmi { namespace protection {
+namespace vmu { namespace protection {
 
     constexpr inline native_protection_t to_native(flags flags)
     {
@@ -64,7 +64,7 @@ namespace vmi { namespace protection {
         case PAGE_EXECUTE_READWRITE: case PAGE_EXECUTE_WRITECOPY:
             return (flags::read | flags::write | flags::exec);
         default:
-            throw std::range_error("unknown protection constant: " + std::to_string(_native));
+            throw std::range_error("unknown protection constant: " + std::to_string(flags));
         }
     }
 

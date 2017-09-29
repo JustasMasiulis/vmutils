@@ -24,39 +24,37 @@ namespace vmu {
 
     inline local_region query(std::uintptr_t address)
     {
-        detail::winapi::MEMORY_BASIC_INFORMATION info;
-        if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
-            , &info
-            , sizeof(info)) == 0)
+        detail::MEMORY_BASIC_INFORMATION info;
+        if (VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
             detail::throw_last_error("VirtualQuery() failed");
 
-        if (info.State == MEM_RESERVE)
+        if (info.State == detail::mem_reserve)
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{ base // begin
-            , base + info.RegionSize // end
-            , info.Protect // prot
-            , (info.Type & MEM_PRIVATE) == 0 // shared
-            , info.State != MEM_FREE }; // in_use
+        return local_region{base // begin
+                            , base + info.RegionSize // end
+                            , info.Protect // prot
+                            , (info.Type & detail::mem_private) == 0 // shared
+                            , (info.Protect & PAGE_GUARD)
+                            , info.State != detail::mem_free}; // in_use
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
-        detail::winapi::MEMORY_BASIC_INFORMATION info;
-        if (winapi::VirtualQuery(reinterpret_cast<const void*>(address)
-            , &info
-            , sizeof(info)) == 0)
+        detail::MEMORY_BASIC_INFORMATION info;
+        if (detail::VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
             ec = detail::get_last_error();
 
-        if (info.State == MEM_RESERVE)
+        if (info.State == detail::mem_reserve)
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{ base // begin
-            , base + info.RegionSize // end
-            , info.Protect // prot
-            , (info.Type & MEM_PRIVATE) == 0 // shared
-            , info.State != MEM_FREE }; // in_use
+        return local_region{base // begin
+                            , base + info.RegionSize // end
+                            , vmu::protection::storage(info.Protect) // prot
+                            , (info.Type & detail::mem_private) == 0 // shared
+                            , (info.Protect & PAGE_GUARD) != 0 // guarded
+                            , info.State != detail::mem_free}; // in_use
     }
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
@@ -64,14 +62,12 @@ namespace vmu {
         std::vector<local_region> regions;
         while (begin < end) {
             regions.emplace_back(query(begin));
-            begin = regions.back().end;
+            begin = regions.back().end();
         }
 
         return regions;
     }
-    inline std::vector<local_region> query_range(std::uintptr_t begin
-                                           , std::uintptr_t end
-                                           , std::error_code& ec)
+    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
     {
         std::vector<local_region> regions;
         while (begin < end) {
@@ -79,7 +75,7 @@ namespace vmu {
             if (ec)
                 return regions;
 
-            begin = regions.back().end;
+            begin = regions.back().end();
         }
 
         return regions;
@@ -98,17 +94,13 @@ namespace vmu {
     }
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end)
+    inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
     {
         throw std::logic_error("not implemented");
     }
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec)
+    inline std::vector<remote_region>
+    query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
     {
         throw std::logic_error("not implemented");
     }
