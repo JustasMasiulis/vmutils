@@ -18,6 +18,16 @@
 #define VMU_LINUX_QUERY_INL
 
 #include "../../query.hpp"
+#include <mach/mach.h>
+
+namespace vmu { namespace detail {
+
+    inline bool is_shared(int sharing) noexcept
+    {
+        return sharing == SM_SHARED || sharing == SM_TRUESHARED || sharing == SM_SHARED_ALIASED;
+    }
+
+}}
 
 namespace vmu {
 
@@ -27,47 +37,96 @@ namespace vmu {
         ::mach_vm_address_t       region_base = address;
         ::mach_vm_size_t          region_size = 0;
         ::vm_region_extended_info info;
-        ::mach_msg_type_number_t  info_size = sizeof(::vm_region_extended_info);
+        ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
         ::mach_port_t             object_name = 0;
 
-        const auto kr = ::mach_vm_region(::mach_task_self(),
-                                         &region_base,
-                                         &region_size,
-                                         VM_REGION_EXTENDED_INFO,
-                                         reinterpret_cast<::vm_region_info_t>(&info),
-                                         &info_size,
-                                         &object_name);
+        const auto kr = ::mach_vm_region(::mach_task_self()
+                                         , &region_base
+                                         , &region_size
+                                         , VM_REGION_EXTENDED_INFO
+                                         , reinterpret_cast<::vm_region_info_t>(&info)
+                                         , &info_size
+                                         , &object_name);
 
         if (kr != KERN_SUCCESS)
             throw std::system_error(std::error_code(kr, std::system_category()), "mach_vm_region() failed");
 
         if (region_base > address)
-            return local_region{ address, static_cast<std::uintptr_t>(region_base), protection::storage(0), false, false, false };
+            return {static_cast<std::uintptr_t>(region_base)
+                    , static_cast<std::uintptr_t>(region_size)
+                    , protection::storage(0)
+                    , false
+                    , false
+                    , false};
 
-        return local_region{ static_cast<std::uintptr_t>(region_base)
-                            , static_cast<std::uintptr_t>(region_base + region_size)
-                            , info.protection
-                            , info.share_mode == SM_SHARED 
-                                || info.share_mode == SM_TRUESHARED
-                                || info.share_mode == SM_SHARED_ALIASED
-                            , info.user_tag == VM_MEMORY_GUARD
-                            , true };
+        return {static_cast<std::uintptr_t>(region_base)
+                , static_cast<std::uintptr_t>(region_size)
+                , info.protection
+                , is_shared(info.share_mode)
+                , info.user_tag == VM_MEMORY_GUARD
+                , true};
     };
 
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
+        // The address is aligned to the enclosing region
+        ::mach_vm_address_t       region_base = address;
+        ::mach_vm_size_t          region_size = 0;
+        ::vm_region_extended_info info;
+        ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
+        ::mach_port_t             object_name = 0;
 
+        const auto kr = ::mach_vm_region(::mach_task_self()
+                                         , &region_base
+                                         , &region_size
+                                         , VM_REGION_EXTENDED_INFO
+                                         , reinterpret_cast<::vm_region_info_t>(&info)
+                                         , &info_size
+                                         , &object_name);
+
+        if (kr != KERN_SUCCESS) {
+            ec = std::error_code(kr, std::system_category());
+            return {};
+        }
+
+        if (region_base > address)
+            return {static_cast<std::uintptr_t>(region_base)
+                    , static_cast<std::uintptr_t>(region_size)
+                    , protection::storage(0)
+                    , false
+                    , false
+                    , false};
+
+        return {static_cast<std::uintptr_t>(region_base)
+                , static_cast<std::uintptr_t>(region_size)
+                , info.protection
+                , detail::is_shared(info.share_mode)
+                , info.user_tag == VM_MEMORY_GUARD
+                , true};
     }
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
     {
+        std::vector<local_region> regions;
+        while (begin < end) {
+            regions.emplace_back(query(begin));
+            begin = regions.back().end();
+        }
 
+        return regions;
     }
-    inline std::vector<local_region> query_range(std::uintptr_t begin
-                                           , std::uintptr_t end
-                                           , std::error_code& ec)
+    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
     {
+        std::vector<local_region> regions;
+        while (begin < end) {
+            regions.emplace_back(query(begin, ec));
+            if (ec)
+                return regions;
 
+            begin = regions.back().end();
+        }
+
+        return regions;
     }
 
 
@@ -83,17 +142,13 @@ namespace vmu {
     }
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end)
+    inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
     {
 
     }
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec)
+    inline std::vector<remote_region>
+    query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
     {
 
     }

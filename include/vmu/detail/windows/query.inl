@@ -50,12 +50,12 @@ namespace vmu {
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{base
-                            , info.RegionSize
-                            , info.Protect
-                            , (info.Type & detail::mem_private) == 0
-                            , (info.Protect & PAGE_GUARD)
-                            , info.State != detail::mem_free};
+        return {base
+                , info.RegionSize
+                , info.Protect
+                , (info.Type & detail::mem_private) == 0
+                , (info.Protect & PAGE_GUARD)
+                , info.State != detail::mem_free};
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
@@ -67,12 +67,12 @@ namespace vmu {
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{base
-                            , info.RegionSize
-                            , vmu::protection::storage(info.Protect)
-                            , (info.Type & detail::mem_private) == 0
-                            , (info.Protect & PAGE_GUARD) != 0
-                            , info.State != detail::mem_free};
+        return {base
+                , info.RegionSize
+                , info.Protect
+                , (info.Type & detail::mem_private) == 0
+                , (info.Protect & PAGE_GUARD) != 0
+                , info.State != detail::mem_free};
     }
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
