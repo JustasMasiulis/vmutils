@@ -102,6 +102,6 @@ namespace vmu { namespace protection {
                 || (_native & PAGE_EXECUTE_WRITECOPY));
     }
 
-}} // namespace vmi::protection
+}} // namespace vmu::protection
 
 #endif // include guard

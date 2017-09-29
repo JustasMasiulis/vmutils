@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#ifndef VMI_REGION_HPP
-#define VMI_REGION_HPP
+#ifndef VMU_REGION_HPP
+#define VMU_REGION_HPP
 
 #include <cstdint>
 #include "protection.hpp"
@@ -45,7 +45,7 @@ namespace vmu {
 
         Ptr                 base_address;
         Ptr                 size;
-        protection::storage prot;
+        protection::storage prot{};
         bool                shared;
         bool                guarded;
         bool                in_use;

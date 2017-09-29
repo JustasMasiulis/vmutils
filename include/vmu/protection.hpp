@@ -19,13 +19,15 @@
 
 namespace vmu {
 
-#if defined(_WIN32)
-    using native_protection_t = unsigned long;
-#else
-    using native_protection_t = int;
-#endif
+    #if defined(_WIN32)
+        using native_protection_t = unsigned long;
+    #else
+        using native_protection_t = int;
+    #endif
 
-    namespace protection {
+}
+
+namespace vmu { namespace protection {
 
         enum class flags : native_protection_t {
             none = 0,

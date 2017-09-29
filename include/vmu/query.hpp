@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#ifndef VMI_QUERY_HPP
-#define VMI_QUERY_HPP
+#ifndef VMU_QUERY_HPP
+#define VMU_QUERY_HPP
 
 #include <vector>
 #include <system_error>

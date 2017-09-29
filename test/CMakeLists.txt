@@ -5,7 +5,7 @@ set (CATCH_INCLUDE_PATH "${CATCH_MODULE_PATH}/include")
 include ("${CATCH_MODULE_PATH}/contrib/ParseAndAddCatchTests.cmake")
 
 #configure variables
-set (TEST_APP_NAME "vmi_test")
+set (TEST_APP_NAME "vmu_test")
 
 #configure directories
 set (TEST_MODULE_PATH "${PROJECT_SOURCE_DIR}/test")
@@ -23,7 +23,7 @@ set (TEST_SOURCE_FILES
 add_executable (${TEST_APP_NAME} ${TEST_SOURCE_FILES})
 
 #add the library
-target_link_libraries (${TEST_APP_NAME} vmi)
+target_link_libraries (${TEST_APP_NAME} vmu)
 
 # Turn on CMake testing capabilities
 enable_testing()
