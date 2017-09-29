@@ -23,10 +23,31 @@ namespace vmu { namespace detail {
         unsigned long Type;
     };
 
+    struct SYSTEM_INFO {
+        union {
+            unsigned long dwOemId;
+            struct {
+                unsigned short wProcessorArchitecture;
+                unsigned short wReserved;
+            };
+        };
+        unsigned long dwPageSize;
+        void* lpMinimumApplicationAddress;
+        void* lpMaximumApplicationAddress;
+        ULONG_PTR_     dwActiveProcessorMask;
+        unsigned long  dwNumberOfProcessors;
+        unsigned long  dwProcessorType;
+        unsigned long  dwAllocationGranularity;
+        unsigned short wProcessorLevel;
+        unsigned short wProcessorRevision;
+    };
+
     extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
 
     extern "C" __declspec(dllimport) ULONG_PTR_ __stdcall
     VirtualQuery(const void* address, MEMORY_BASIC_INFORMATION* buffer, ULONG_PTR_ size_of_info);
+
+    extern "C" __declspec(dllimport) void __stdcall GetSystemInfo(SYSTEM_INFO* info);
 
     constexpr static unsigned long mem_commit  = 0x1000;
     constexpr static unsigned long mem_free    = 0x10000;

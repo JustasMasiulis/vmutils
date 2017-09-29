@@ -20,24 +20,42 @@
 #include "error.hpp"
 #include "../../query.hpp"
 
+namespace vmu { namespace detail {
+
+    inline unsigned long page_size_impl() noexcept
+    {
+        SYSTEM_INFO info;
+        GetSystemInfo(&info);
+        return info.dwPageSize;
+    }
+
+}}
+
 namespace vmu {
+
+    inline unsigned long page_size() noexcept
+    {
+        const static auto size = detail::page_size_impl();
+        return size;
+    }
+
 
     inline local_region query(std::uintptr_t address)
     {
         detail::MEMORY_BASIC_INFORMATION info;
-        if (VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
+        if (detail::VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
             detail::throw_last_error("VirtualQuery() failed");
 
         if (info.State == detail::mem_reserve)
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{base // begin
-                            , base + info.RegionSize // end
-                            , info.Protect // prot
-                            , (info.Type & detail::mem_private) == 0 // shared
+        return local_region{base
+                            , info.RegionSize
+                            , info.Protect
+                            , (info.Type & detail::mem_private) == 0
                             , (info.Protect & PAGE_GUARD)
-                            , info.State != detail::mem_free}; // in_use
+                            , info.State != detail::mem_free};
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
@@ -49,12 +67,12 @@ namespace vmu {
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return local_region{base // begin
-                            , base + info.RegionSize // end
-                            , vmu::protection::storage(info.Protect) // prot
-                            , (info.Type & detail::mem_private) == 0 // shared
-                            , (info.Protect & PAGE_GUARD) != 0 // guarded
-                            , info.State != detail::mem_free}; // in_use
+        return local_region{base
+                            , info.RegionSize
+                            , vmu::protection::storage(info.Protect)
+                            , (info.Type & detail::mem_private) == 0
+                            , (info.Protect & PAGE_GUARD) != 0
+                            , info.State != detail::mem_free};
     }
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
