@@ -62,7 +62,7 @@ namespace vmu {
         return {static_cast<std::uintptr_t>(region_base)
                 , static_cast<std::uintptr_t>(region_size)
                 , info.protection
-                , is_shared(info.share_mode)
+                , detail::is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
                 , true};
     };

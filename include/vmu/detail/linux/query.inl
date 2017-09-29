@@ -105,7 +105,7 @@ namespace vmu {
 
     inline local_region query(std::uintptr_t address)
     {
-        auto maps{detail::open_maps(::getpid())};
+        std::ifstream maps{detail::open_maps(::getpid())};
 
         return detail::query_impl<std::uintptr_t>(maps, address);
     }
@@ -122,7 +122,7 @@ namespace vmu {
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
     {
-        auto maps{detail::open_maps(::getpid())};
+        std::ifstream maps{detail::open_maps(::getpid())};
 
         return detail::query_range_impl<std::uintptr_t>(maps, begin, end);
     }
@@ -141,7 +141,7 @@ namespace vmu {
     template<typename Handle>
     inline remote_region query(const Handle& handle, std::uint64_t address)
     {
-        auto maps{detail::open_maps(handle)};
+        std::ifstream maps{detail::open_maps(handle)};
 
         return detail::query_impl<std::uint64_t>(maps, address);
     }
@@ -160,7 +160,7 @@ namespace vmu {
     template<typename Handle>
     inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
     {
-        auto maps{detail::open_maps(handle)};
+        std::ifstream maps{detail::open_maps(handle)};
 
         return detail::query_range_impl<std::uint64_t>(maps, begin, end);
     }
