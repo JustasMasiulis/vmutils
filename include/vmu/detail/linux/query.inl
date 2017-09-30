@@ -90,22 +90,17 @@ namespace vmu { namespace detail {
         return regions;
     }
 
-    inline std::ifstream open_maps(int pid)
-    {
-        std::ifstream maps;
-        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        maps.open("/proc/" + std::to_string(pid) + "/maps");
-
-        return maps;
-    }
-
 }}
 
 namespace vmu {
 
+    // TODO less copy paste
+
     inline local_region query(std::uintptr_t address)
     {
-        std::ifstream maps{detail::open_maps(::getpid())};
+        std::ifstream maps;
+        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        maps.open("/proc/" + std::to_string(::getpid()) + "/maps");
 
         return detail::query_impl<std::uintptr_t>(maps, address);
     }
@@ -122,7 +117,9 @@ namespace vmu {
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
     {
-        std::ifstream maps{detail::open_maps(::getpid())};
+        std::ifstream maps;
+        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        maps.open("/proc/" + std::to_string(::getpid()) + "/maps");
 
         return detail::query_range_impl<std::uintptr_t>(maps, begin, end);
     }
@@ -141,7 +138,9 @@ namespace vmu {
     template<typename Handle>
     inline remote_region query(Handle handle, std::uint64_t address)
     {
-        std::ifstream maps{detail::open_maps(handle)};
+        std::ifstream maps;
+        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        maps.open("/proc/" + std::to_string(handle) + "/maps");
 
         return detail::query_impl<std::uint64_t>(maps, address);
     }
@@ -160,7 +159,9 @@ namespace vmu {
     template<typename Handle>
     inline std::vector<remote_region> query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
     {
-        std::ifstream maps{detail::open_maps(handle)};
+        std::ifstream maps;
+        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        maps.open("/proc/" + std::to_string(handle) + "/maps");
 
         return detail::query_range_impl<std::uint64_t>(maps, begin, end);
     }

@@ -24,7 +24,8 @@ namespace vmu { namespace detail {
 
     inline bool is_shared(int sharing) noexcept
     {
-        return sharing == SM_SHARED || sharing == SM_TRUESHARED
+        return sharing == SM_SHARED
+               || sharing == SM_TRUESHARED
                || sharing == SM_SHARED_ALIASED;
     }
 
@@ -46,30 +47,26 @@ namespace vmu { namespace detail {
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
         ::mach_port_t             object_name = 0;
 
-        const auto kr = ::mach_vm_region(::mach_task_self()
-                                         , &region_base
-                                         , &region_size
-                                         , VM_REGION_EXTENDED_INFO
-                                         , reinterpret_cast<::vm_region_info_t>(&info)
-                                         , &info_size
-                                         , &object_name);
+        const auto kr = mach_vm_region(::mach_task_self()
+                                       , &region_base
+                                       , &region_size
+                                       , VM_REGION_EXTENDED_INFO
+                                       , reinterpret_cast<::vm_region_info_t>(&info)
+                                       , &info_size
+                                       , &object_name);
 
         if (kr != KERN_SUCCESS)
             throw std::system_error(std::error_code(kr, std::system_category())
                                     , "mach_vm_region() failed");
 
         if (region_base > address)
-            return {static_cast<std::uintptr_t>(region_base)
-                    , static_cast<std::uintptr_t>(region_size)
-                    , protection::storage(0)
-                    , false
-                    , false
-                    , false};
+            return {(Ptr) (region_base) // TODO checked pointer cast
+                    , (Ptr) (region_size), protection::storage(0), false, false, false};
 
         // cannot use reinterpret_cast because it will fail on stuff like unsigned long ->
         // unsigned int etc
         return {(Ptr) (region_base)
-                , (Ptr) (region_size) // TODO checked pointer cast
+                , (Ptr) (region_size)
                 , info.protection
                 , detail::is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
@@ -87,20 +84,20 @@ namespace vmu { namespace detail {
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
         ::mach_port_t             object_name = 0;
 
-        const auto kr = ::mach_vm_region(::mach_task_self()
-                                         , &region_base
-                                         , &region_size
-                                         , VM_REGION_EXTENDED_INFO
-                                         , reinterpret_cast<::vm_region_info_t>(&info)
-                                         , &info_size
-                                         , &object_name);
+        const auto kr = mach_vm_region(::mach_task_self()
+                                       , &region_base
+                                       , &region_size
+                                       , VM_REGION_EXTENDED_INFO
+                                       , reinterpret_cast<::vm_region_info_t>(&info)
+                                       , &info_size
+                                       , &object_name);
 
         if (kr != KERN_SUCCESS)
             ec = std::error_code(kr, std::system_category());
 
         if (region_base > address)
-            return {static_cast<std::uintptr_t>(region_base)
-                    , static_cast<std::uintptr_t>(region_size)
+            return {(Ptr) (region_base)
+                    , (Ptr) (region_size)
                     , protection::storage(0)
                     , false
                     , false
@@ -109,7 +106,7 @@ namespace vmu { namespace detail {
         // cannot use reinterpret_cast because it will fail on stuff like unsigned long ->
         // unsigned int etc
         return {(Ptr) (region_base)
-                , (Ptr) (region_size) // TODO checked pointer cast
+                , (Ptr) (region_size)
                 , info.protection
                 , detail::is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
@@ -159,19 +156,19 @@ namespace vmu {
     template<typename Handle>
     inline remote_region query(Handle handle, std::uint64_t address)
     {
-        return detail::query_impl<std::uintptr_t>(handle, address);
+        return detail::query_impl<std::uint64_t>(handle, address);
     }
     template<typename Handle>
     inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec)
     {
-        return detail::query_impl<std::uintptr_t>(::mach_task_self(), address, ec);
+        return detail::query_impl<std::uint64_t>(::mach_task_self(), address, ec);
     }
 
     template<typename Handle>
     inline std::vector<remote_region>
     query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
     {
-        std::vector<local_region> regions;
+        std::vector<remote_region> regions;
         while (begin < end) {
             regions.emplace_back(query(handle, begin));
             begin = regions.back().end();
@@ -185,7 +182,7 @@ namespace vmu {
                                                   , std::uint64_t end
                                                   , std::error_code& ec)
     {
-        std::vector<local_region> regions;
+        std::vector<remote_region> regions;
         while (begin < end) {
             regions.emplace_back(query(handle, begin, ec));
             if (ec)
