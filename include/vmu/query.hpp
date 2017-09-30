@@ -28,24 +28,22 @@ namespace vmu {
     inline local_region query(std::uintptr_t address);
     inline local_region query(std::uintptr_t address, std::error_code& ec);
 
-    inline std::vector<local_region> query_range(std::uintptr_t begin
-                                                 , std::uintptr_t end);
-    inline std::vector<local_region> query_range(std::uintptr_t begin
-                                                 , std::uintptr_t end
-                                                 , std::error_code& ec);
+    inline std::vector<local_region>
+    query_range(std::uintptr_t begin, std::uintptr_t end);
+    inline std::vector<local_region>
+    query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec);
 
 
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address);
+    inline remote_region query(Handle handle, std::uint64_t address);
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address, std::error_code& ec);
+    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec);
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end);
+    inline std::vector<remote_region>
+    query_range(Handle handle, std::uint64_t begin, std::uint64_t end);
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle
+    inline std::vector<remote_region> query_range(Handle handle
                                                   , std::uint64_t begin
                                                   , std::uint64_t end
                                                   , std::error_code& ec);

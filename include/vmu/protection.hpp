@@ -20,9 +20,9 @@
 namespace vmu {
 
     #if defined(_WIN32)
-    using native_protection_t = unsigned long;
+        using native_protection_t = unsigned long;
     #else
-    using native_protection_t = int;
+        using native_protection_t = int;
     #endif
 
 }
@@ -30,10 +30,7 @@ namespace vmu {
 namespace vmu { namespace protection {
 
     enum class flags : native_protection_t {
-        none  = 0,
-        read  = 1,
-        write = 2,
-        exec  = 4
+        none = 0, read = 1, write = 2, exec = 4
     };
 
 
@@ -71,17 +68,20 @@ namespace vmu { namespace protection {
 
     constexpr flags operator|(flags lhs, flags rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs) | static_cast<native_protection_t>(rhs));
+        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+                                  | static_cast<native_protection_t>(rhs));
     }
 
     constexpr flags operator&(flags lhs, flags rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs) & static_cast<native_protection_t>(rhs));
+        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+                                  & static_cast<native_protection_t>(rhs));
     }
 
     constexpr flags operator^(flags lhs, flags rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs) ^ static_cast<native_protection_t>(rhs));
+        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+                                  ^ static_cast<native_protection_t>(rhs));
     }
 
     constexpr flags operator~(flags rhs) noexcept
@@ -91,21 +91,24 @@ namespace vmu { namespace protection {
 
     constexpr flags& operator|=(flags& lhs, flags rhs) noexcept
     {
-        lhs = static_cast<flags> (static_cast<native_protection_t>(lhs) | static_cast<native_protection_t>(rhs));
+        lhs = static_cast<flags> (static_cast<native_protection_t>(lhs)
+                                  | static_cast<native_protection_t>(rhs));
 
         return lhs;
     }
 
     constexpr flags& operator&=(flags& lhs, flags rhs) noexcept
     {
-        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs) & static_cast<native_protection_t>(rhs));
+        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs)
+                                 & static_cast<native_protection_t>(rhs));
 
         return lhs;
     }
 
     constexpr flags& operator^=(flags& lhs, flags rhs) noexcept
     {
-        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs) ^ static_cast<native_protection_t>(rhs));
+        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs)
+                                 ^ static_cast<native_protection_t>(rhs));
 
         return lhs;
     }

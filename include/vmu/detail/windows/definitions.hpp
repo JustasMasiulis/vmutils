@@ -5,9 +5,9 @@ namespace vmu { namespace detail {
 
 #ifdef _WIN64
     #if defined(__CYGWIN__)
-    typedef unsigned long ULONG_PTR_;
+        typedef unsigned long ULONG_PTR_;
     #else
-    typedef unsigned __int64 ULONG_PTR_;
+        typedef unsigned __int64 ULONG_PTR_;
     #endif
 #else
     typedef unsigned long ULONG_PTR_;
@@ -45,7 +45,9 @@ namespace vmu { namespace detail {
     extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
 
     extern "C" __declspec(dllimport) ULONG_PTR_ __stdcall
-    VirtualQuery(const void* address, MEMORY_BASIC_INFORMATION* buffer, ULONG_PTR_ size_of_info);
+    VirtualQuery(const void* address
+                 , MEMORY_BASIC_INFORMATION* buffer
+                 , ULONG_PTR_ size_of_info);
 
     extern "C" __declspec(dllimport) void __stdcall GetSystemInfo(SYSTEM_INFO* info);
 

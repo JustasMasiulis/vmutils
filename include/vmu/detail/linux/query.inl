@@ -92,9 +92,9 @@ namespace vmu { namespace detail {
 
     inline std::ifstream open_maps(int pid)
     {
-        std::ifstream maps("/proc/" + std::to_string(pid) + "/maps");
-        if (!maps.is_open())
-            throw std::runtime_error("failed to open proc/<pid>/maps");
+        std::ifstream maps;
+        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        maps.open("/proc/" + std::to_string(pid) + "/maps");
 
         return maps;
     }
@@ -139,14 +139,14 @@ namespace vmu {
 
 
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address)
+    inline remote_region query(Handle handle, std::uint64_t address)
     {
         std::ifstream maps{detail::open_maps(handle)};
 
         return detail::query_impl<std::uint64_t>(maps, address);
     }
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address, std::error_code& ec)
+    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
@@ -158,7 +158,7 @@ namespace vmu {
     }
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
+    inline std::vector<remote_region> query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
     {
         std::ifstream maps{detail::open_maps(handle)};
 
@@ -166,7 +166,7 @@ namespace vmu {
     }
     template<typename Handle>
     inline std::vector<remote_region>
-    query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
+    query_range(Handle handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {

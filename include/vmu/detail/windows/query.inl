@@ -43,36 +43,35 @@ namespace vmu {
     inline local_region query(std::uintptr_t address)
     {
         detail::MEMORY_BASIC_INFORMATION info;
-        if (detail::VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
+        if (detail::VirtualQuery(reinterpret_cast<const void*>(address)
+                                 , &info
+                                 , sizeof(info)) == 0)
             detail::throw_last_error("VirtualQuery() failed");
 
         if (info.State == detail::mem_reserve)
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return {base
-                , info.RegionSize
-                , info.Protect
-                , (info.Type & detail::mem_private) == 0
-                , (info.Protect & PAGE_GUARD)
-                , info.State != detail::mem_free};
+        return {base, info.RegionSize, info.Protect, (info.Type & detail::mem_private)
+                                                     == 0, (info.Protect & PAGE_GUARD),
+                info.State != detail::mem_free};
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
         detail::MEMORY_BASIC_INFORMATION info;
-        if (detail::VirtualQuery(reinterpret_cast<const void*>(address), &info, sizeof(info)) == 0)
+        if (detail::VirtualQuery(reinterpret_cast<const void*>(address)
+                                 , &info
+                                 , sizeof(info)) == 0)
             ec = detail::get_last_error();
 
         if (info.State == detail::mem_reserve)
             info.Protect = PAGE_NOACCESS;
 
         const auto base = reinterpret_cast<std::uintptr_t>(info.BaseAddress);
-        return {base
-                , info.RegionSize
-                , info.Protect
-                , (info.Type & detail::mem_private) == 0
-                , (info.Protect & PAGE_GUARD) != 0
-                , info.State != detail::mem_free};
+        return {base, info.RegionSize, info.Protect, (info.Type & detail::mem_private)
+                                                     == 0, (info.Protect & PAGE_GUARD)
+                                                           != 0, info.State
+                                                                 != detail::mem_free};
     }
 
     inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
@@ -85,7 +84,8 @@ namespace vmu {
 
         return regions;
     }
-    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
+    inline std::vector<local_region>
+    query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
     {
         std::vector<local_region> regions;
         while (begin < end) {
@@ -101,24 +101,27 @@ namespace vmu {
 
 
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address)
+    inline remote_region query(Handle handle, std::uint64_t address)
     {
         throw std::logic_error("not implemented");
     }
     template<typename Handle>
-    inline remote_region query(const Handle& handle, std::uint64_t address, std::error_code& ec)
+    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec)
     {
         throw std::logic_error("not implemented");
     }
 
     template<typename Handle>
-    inline std::vector<remote_region> query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end)
+    inline std::vector<remote_region>
+    query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
     {
         throw std::logic_error("not implemented");
     }
     template<typename Handle>
-    inline std::vector<remote_region>
-    query_range(const Handle& handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
+    inline std::vector<remote_region> query_range(Handle handle
+                                                  , std::uint64_t begin
+                                                  , std::uint64_t end
+                                                  , std::error_code& ec)
     {
         throw std::logic_error("not implemented");
     }
