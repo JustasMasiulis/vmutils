@@ -25,13 +25,20 @@ namespace vmu {
 
     // TODO replace addresses with templates so you can pass both pointers and integers with checking
 
-    inline local_region query(std::uintptr_t address);
-    inline local_region query(std::uintptr_t address, std::error_code& ec);
+    template<class RegionAddress = std::uintptr_t, class Address>
+    inline basic_region<RegionAddress> query(Address address);
 
-    inline std::vector<local_region>
-    query_range(std::uintptr_t begin, std::uintptr_t end);
-    inline std::vector<local_region>
-    query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec);
+    template<class RegionAddress = std::uintptr_t, class Address>
+    inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
+
+
+    template<class RegionAddress, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Address begin, Address end);
+
+    template<class RegionAddress, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Address begin, Address end, std::error_code& ec);
 
 
     template<typename Handle>

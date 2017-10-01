@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(detail_header_files
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/windows/query.inl
         )
 
 set(header_files
