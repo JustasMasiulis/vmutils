@@ -14,9 +14,10 @@
 * limitations under the License.
 */
 
-#ifndef VMU_LINUX_QUERY_INL
-#define VMU_LINUX_QUERY_INL
+#ifndef VMU_OSX_QUERY_INL
+#define VMU_OSX_QUERY_INL
 
+#include "../checked_pointers.hpp"
 #include "../../query.hpp"
 #include <mach/mach.h>
 
@@ -37,8 +38,8 @@ namespace vmu { namespace detail {
                                             , mach_msg_type_number_t* infoCnt
                                             , mach_port_t* object_name);
 
-    template<class Ptr, class Address>
-    inline basic_region<Ptr> query_impl(vm_map_t handle, Address address)
+    template<class RegionAddress, class Address>
+    inline basic_region<RegionAddress> query_impl(vm_map_t handle, Address address)
     {
         // The address is aligned to the enclosing region
         ::mach_vm_address_t       region_base = address;
@@ -60,15 +61,17 @@ namespace vmu { namespace detail {
                                     , "mach_vm_region() failed");
 
         if (region_base > address)
-            return {(Ptr) (region_base) // TODO checked pointer cast
-                    , (Ptr) (region_size), protection::storage(0), false, false, false};
+            return {detail::pointer_cast<RegionAddress>(region_base)
+                    , detail::pointer_cast<RegionAddress>(region_size)
+                    , protection::storage(0)
+                    , false
+                    , false
+                    , false};
 
-        // cannot use reinterpret_cast because it will fail on stuff like unsigned long ->
-        // unsigned int etc
-        return {(Ptr) (region_base)
-                , (Ptr) (region_size)
+        return {detail::pointer_cast<RegionAddress>(region_base)(region_base)
+                , detail::pointer_cast<RegionAddress>(region_size)
                 , info.protection
-                , detail::is_shared(info.share_mode)
+                , is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
                 , true};
     }
@@ -117,82 +120,29 @@ namespace vmu { namespace detail {
 
 namespace vmu {
 
-    inline local_region query(std::uintptr_t address)
+    template<class RegionAddress, class Address>
+    inline basic_region<RegionAddress> query(Address address)
     {
-        return detail::query_impl<std::uintptr_t>(::mach_task_self(), address);
+        return detail::query_impl<RegionAddress>(::mach_task_self(), address);
     };
-
-    inline local_region query(std::uintptr_t address, std::error_code& ec)
+    template<class RegionAddress, class Address>
+    inline basic_region<RegionAddress> query(Address address, std::error_code& ec) noexcept
     {
-        return detail::query_impl<std::uintptr_t>(::mach_task_self(), address, ec);
-    }
-
-    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
-    {
-        std::vector<local_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(begin));
-            begin = regions.back().end();
-        }
-
-        return regions;
-    }
-    inline std::vector<local_region>
-    query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
-    {
-        std::vector<local_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(begin, ec));
-            if (ec)
-                return regions;
-
-            begin = regions.back().end();
-        }
-
-        return regions;
+        return detail::query_impl<RegionAddress>(::mach_task_self(), address, ec);
     }
 
 
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address)
+    template<class RegionAddress, class Address, typename Handle>
+    inline remote_region query(Handle handle, Address address)
     {
-        return detail::query_impl<std::uint64_t>(handle, address);
+        return detail::query_impl<RegionAddress(handle, address);
     }
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec)
+    template<class RegionAddress, class Address, typename Handle>
+    inline remote_region query(Handle handle, Address address, std::error_code& ec)
     {
-        return detail::query_impl<std::uint64_t>(::mach_task_self(), address, ec);
+        return detail::query_impl<RegionAddress>(::mach_task_self(), address, ec);
     }
-
-    template<typename Handle>
-    inline std::vector<remote_region>
-    query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
-    {
-        std::vector<remote_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(handle, begin));
-            begin = regions.back().end();
-        }
-
-        return regions;
-    }
-    template<typename Handle>
-    inline std::vector<remote_region> query_range(Handle handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec)
-    {
-        std::vector<remote_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(handle, begin, ec));
-            if (ec)
-                return regions;
-
-            begin = regions.back().end();
-        }
-
-        return regions;
-    }
+    
 }
 
-#endif // !VMU_LINUX_QUERY_INL
+#endif // include guard
