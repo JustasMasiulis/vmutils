@@ -33,15 +33,15 @@ namespace vmu { namespace detail {
     template<class RegionAddress, class InfoT>
     inline basic_region<RegionAddress> parse_info(InfoT& info) noexcept
     {
-        if (info.State == detail::mem_reserve)
-            info.Protect = PAGE_NOACCESS;
+        if (info.State == mem_reserve)
+            info.Protect = no_access;
 
         return {detail::pointer_cast<RegionAddress>(info.BaseAddress)
                 , info.RegionSize
                 , info.Protect
-                , (info.Type & detail::mem_private) == 0
-                , (info.Protect & PAGE_GUARD) != 0
-                , info.State != detail::mem_free};
+                , (info.Type & mem_private) == 0
+                , (info.Protect & page_guard) != 0
+                , info.State != mem_free};
     }
 
     struct native_query {
