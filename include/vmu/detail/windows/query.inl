@@ -47,7 +47,8 @@ namespace vmu { namespace detail {
     struct native_query {
         using address_type = const void*;
 
-        static vmu::detail::MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
+        static vmu::detail::MEMORY_BASIC_INFORMATION
+        query(void* handle, address_type address)
         {
             vmu::detail::MEMORY_BASIC_INFORMATION info;
             if (vmu::detail::VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
@@ -64,11 +65,13 @@ namespace vmu { namespace detail {
 
             return info;
         }
-            
+    };
+
     struct wow64_query {
         using address_type = std::uint64_t;
 
-        static vmu::detail::MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
+        static vmu::detail::MEMORY_BASIC_INFORMATION
+        query(void* handle, address_type address)
         {
             throw std::logic_error("not implemented");
         }
@@ -83,9 +86,10 @@ namespace vmu { namespace detail {
     inline basic_region<RegionAddress> query_impl(void* handle, Address address)
     {
         auto info{QueryT::query(handle
-                                , detail::pointer_cast<QueryT::address_type>(address))};
+                                , detail::pointer_cast<typename QueryT::address_type>(
+                        address))};
 
-        return parse_info(info);
+        return parse_info<RegionAddress>(info);
     };
 
     template<class RegionAddress, class QueryT, class Address>
@@ -94,10 +98,10 @@ namespace vmu { namespace detail {
                                                   , std::error_code& ec) noexcept(!checked_pointers)
     {
         auto info{QueryT::query(handle
-                                , detail::pointer_cast<QueryT::address_type>(addr)
+                                , detail::pointer_cast<typename QueryT::address_type>(addr)
                                 , ec)};
 
-        return parse_info(info);
+        return parse_info<RegionAddress>(info);
     };
 
 }}
@@ -114,15 +118,17 @@ namespace vmu {
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
-        return detail::query_impl<RegionAddress, detail::native_query>(detail::GetCurrentProcess()
-                                                                       , address);
+        return detail::query_impl<RegionAddress
+                                  , detail::native_query>(detail::GetCurrentProcess()
+                                                          , address);
     }
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
-        return detail::query_impl<RegionAddress, detail::native_query>(detail::GetCurrentProcess()
-                                                                       , address
-                                                                       , ec);
+        return detail::query_impl<RegionAddress
+                                  , detail::native_query>(detail::GetCurrentProcess()
+                                                          , address
+                                                          , ec);
     }
 
     template<class RegionAddress = std::uintptr_t, class Address, typename Handle>
@@ -135,10 +141,13 @@ namespace vmu {
 #endif
     }
     template<class RegionAddress = std::uintptr_t, class Address, typename Handle>
-    inline remote_region query(Handle handle, Address address, std::error_code& ec) noexcept
+    inline remote_region
+    query(Handle handle, Address address, std::error_code& ec) noexcept
     {
 #ifdef _WIN64
-        return detail::query_impl<RegionAddress, detail::native_query>(handle, address, ec);
+        return detail::query_impl<RegionAddress, detail::native_query>(handle
+                                                                       , address
+                                                                       , ec);
 #else
         return detail::query_impl<RegionAddress, detail::wow64_query>(handle, address, ec);
 #endif

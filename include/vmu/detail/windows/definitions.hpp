@@ -52,7 +52,7 @@ namespace vmu { namespace detail {
 
     extern "C" __declspec(dllimport) void __stdcall GetSystemInfo(SYSTEM_INFO* info);
     
-    extern "C" __deckspec(dllimport) void* __stdcall GetCurrentProcess();
+    extern "C" __declspec(dllimport) void* __stdcall GetCurrentProcess();
 
     constexpr static unsigned long mem_commit  = 0x1000;
     constexpr static unsigned long mem_free    = 0x10000;

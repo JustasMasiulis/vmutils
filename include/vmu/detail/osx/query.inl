@@ -135,7 +135,7 @@ namespace vmu {
     template<class RegionAddress, class Address, typename Handle>
     inline remote_region query(Handle handle, Address address)
     {
-        return detail::query_impl<RegionAddress(handle, address);
+        return detail::query_impl<RegionAddress>(handle, address);
     }
     template<class RegionAddress, class Address, typename Handle>
     inline remote_region query(Handle handle, Address address, std::error_code& ec)

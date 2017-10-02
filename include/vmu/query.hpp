@@ -32,11 +32,11 @@ namespace vmu {
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
 
 
-    template<class RegionAddress, class Address>
+    template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end);
 
-    template<class RegionAddress, class Address>
+    template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end, std::error_code& ec);
 
