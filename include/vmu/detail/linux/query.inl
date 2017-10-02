@@ -29,64 +29,100 @@ namespace vmu { namespace detail {
         return {(prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)};
     }
 
-    template<typename Ptr>
-    inline basic_region<Ptr> query_impl(std::ifstream& maps, Ptr address)
+    template<class Region>
+    inline void fill_region_gaps(Region& regions)
     {
-        char             prot[4];
-        Ptr              prev_end   = 0;
-        Ptr              prev_begin = 0;
-        for (std::string str; maps; maps.ignore(INT32_MAX, '\n')) {
-            std::getline(maps, str, '-');
-            const auto begin_addr = stoull(str, nullptr, 16);
-
-            if (begin_addr <= address) {
-                std::getline(maps, str, ' ');
-                const auto end_addr = stoull(str, nullptr, 16);
-
-                if (end_addr >= address) {
-                    maps.read(prot, 4);
-                    return {begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-', false, true};
-                }
-                else
-                    prev_end = end_addr;
+        for (std::size_t i = 1; i < regions.size(); ++i)
+            if (regions[i].begin() != regions[i - 1].end()) {
+                regions.emplace(regions.begin() + i
+                                , regions[i - 1].end()
+                                , regions[i].begin() - regions[i - 1].end()
+                                , 0
+                                , false
+                                , false
+                                , false);
+                // increment i twice
+                ++i;
             }
-            else
-                prev_begin = begin_addr;
-        }
-
-        return {prev_end, prev_begin - prev_end, 0, false, false, false};
     }
 
-    template<typename Ptr>
-    inline std::vector<basic_region<Ptr>> query_range_impl(std::ifstream& maps, Ptr begin, Ptr end)
+    template<class RegionAddress>
+    inline basic_region<RegionAddress> query_impl(std::ifstream& maps, std::uint64_t address)
     {
-        std::vector<remote_region> regions;
-        char                       prot[4];
-        for (std::string           buf; maps && begin < end; maps.ignore(INT32_MAX, '\n')) {
-            std::getline(maps, buf, '-');
+        std::uint64_t begin;
+        std::uint64_t end = 0;
+        char          prot[4];
 
-            const auto begin_addr = stoull(buf, nullptr, 16);
-            if (begin_addr < begin)
+        for (; map; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
+            maps >> std::hex >> begin;
+            // address is in free memory and the last end is the beginning of the region
+            if (begin > address)
+                return {detail::pointer_cast<RegionAddress>(end), detail::pointer_cast<
+                        RegionAddress>(begin - end), 0, false, false, false};
+
+            // ignore the dash between addresses
+            maps.ignore();
+            maps >> std::hex >> end;
+
+            if (end < address)
                 continue;
 
-            std::getline(maps, buf, ' ');
-
-            const auto end_addr = stoull(buf, nullptr, 16);
-            begin = end_addr;
-
-            // free memory
-            if (!regions.empty() && regions.back().end() != begin_addr)
-                regions.emplace_back(regions.back().end()
-                                     , begin_addr - regions.back().end()
-                                     , 0
-                                     , false
-                                     , false
-                                     , false);
-
+            // ignore the space
+            maps.ignore();
             maps.read(prot, 4);
-            regions.emplace_back(begin_addr, end_addr - begin_addr, transform_prot(prot), prot[3] != '-', false, true);
+
+            return {detail::pointer_cast<RegionAddress>(begin)
+                    , detail::pointer_cast<RegionAddress>(end - begin)
+                    , transform_prot(prot)
+                    , prot[3] != '-'
+                    , false
+                    , true};
         }
 
+        return {detail::pointer_cast<RegionAddress>(end)
+                , std::numeric_limits<detail::as_uintptr_t<RegionAddress>>::max()
+                , 0
+                , false
+                , false
+                , false};
+    }
+
+    template<class RegionAddress>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range_impl(std::ifstream& maps, std::uint64_t first, std::uint64_t last)
+    {
+        std::uint64_t                            begin;
+        std::uint64_t                            end = 0;
+        char                                     prot[4];
+        std::vector<basic_region<RegionAddress>> regions;
+
+        for (; map; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
+            maps >> std::hex >> begin;
+            if (begin > last)
+                break;
+
+            // ignore the dash between addresses
+            maps.ignore();
+            maps >> std::hex >> end;
+
+            if (end < first)
+                continue;
+
+            // ignore the space
+            maps.ignore();
+            maps.read(prot, 4);
+
+            regions.emplace_back(detail::pointer_cast<RegionAddress>(begin)
+                                 , detail::pointer_cast<RegionAddress>(end - begin)
+                                 , transform_prot(prot)
+                                 , prot[3] != '-'
+                                 , false
+                                 , true);
+        }
+
+        // we now have the regions, but still need to find if there are any gaps and
+        // fill them with free memory regions
+        fill_region_gaps(regions);
         return regions;
     }
 
@@ -94,58 +130,41 @@ namespace vmu { namespace detail {
 
 namespace vmu {
 
-    // TODO less copy paste
-
-    inline local_region query(std::uintptr_t address)
+    template<class RegionAddress = std::uintptr_t, class Address>
+    inline basic_region<RegionAddress> query(Address address)
     {
-        std::ifstream maps;
-        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        maps.open("/proc/" + std::to_string(::getpid()) + "/maps");
-
-        return detail::query_impl<std::uintptr_t>(maps, address);
+        return query<RegionAddress>(::getpid(), address);
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
-        std::ifstream maps("/proc/" + std::to_string(::getpid()) + "/maps");
-        if (!maps.is_open()) {
-            ec = std::make_error_code(std::errc::io_error);
-            return {};
-        }
-
-        return detail::query_impl<std::uintptr_t>(maps, address);
+        return query<RegionAddress>(::getpid(), address, ec);
     }
 
-    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
+    template<class RegionAddress, class Address>
+    inline std::vector<basic_region<RegionAddress>> query_range(Address begin, Address end)
     {
-        std::ifstream maps;
-        maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        maps.open("/proc/" + std::to_string(::getpid()) + "/maps");
-
-        return detail::query_range_impl<std::uintptr_t>(maps, begin, end);
+        return query_range<RegionAddress>(::getpid(), begin, end);
     }
-    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
+    template<class RegionAddress, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Address begin, Address, std::error_code& ec)
     {
-        std::ifstream maps("/proc/" + std::to_string(::getpid()) + "/maps");
-        if (!maps.is_open()) {
-            ec = std::make_error_code(std::errc::io_error);
-            return {};
-        }
-
-        return detail::query_range_impl<std::uintptr_t>(maps, begin, end);
+        return query_range<RegionAddress>(::getpid(), begin, end, ec);
     }
 
 
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address)
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
+    inline basic_region<RegionAddress> query(Handle handle, Address address)
     {
         std::ifstream maps;
         maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         maps.open("/proc/" + std::to_string(handle) + "/maps");
 
-        return detail::query_impl<std::uint64_t>(maps, address);
+        return detail::query_impl<RegionAddress>(maps,
+                detail::pointer_cast<std::uint64_t>(address));
     }
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec)
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
+    inline remote_region query(Handle handle, Address address, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
@@ -153,21 +172,27 @@ namespace vmu {
             return {};
         }
 
-        return detail::query_impl<std::uint64_t>(maps, address);
+        return detail::query_impl<RegionAddress>(maps,
+                detail::pointer_cast<std::uint64_t>(address));
     }
 
-    template<typename Handle>
-    inline std::vector<remote_region> query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Handle handle, Address begin, Address end)
     {
         std::ifstream maps;
         maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         maps.open("/proc/" + std::to_string(handle) + "/maps");
 
-        return detail::query_range_impl<std::uint64_t>(maps, begin, end);
+        return detail::query_range_impl<RegionAddress>(maps,
+                detail::pointer_cast<std::uint64_t>(begin),
+                detail::pointer_cast<std::uint64_t>(end));
     }
-    template<typename Handle>
-    inline std::vector<remote_region>
-    query_range(Handle handle, std::uint64_t begin, std::uint64_t end, std::error_code& ec)
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
+    inline std::vector<remote_region> query_range(Handle handle
+                                                  , Address begin
+                                                  , Address end
+                                                  , std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
@@ -175,8 +200,11 @@ namespace vmu {
             return {};
         }
 
-        return detail::query_range_impl<std::uint64_t>(maps, begin, end);
+        return detail::query_range_impl<RegionAddress>(maps,
+                detail::pointer_cast<std::uint64_t>(begin),
+                detail::pointer_cast<std::uint64_t>(end));
     }
+
 }
 
-#endif // !VMU_LINUX_QUERY_INL
+#endif // include guard

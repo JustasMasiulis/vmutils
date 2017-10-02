@@ -31,7 +31,6 @@ namespace vmu {
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
 
-
     template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end);
@@ -41,25 +40,29 @@ namespace vmu {
     query_range(Address begin, Address end, std::error_code& ec);
 
 
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address);
-    template<typename Handle>
-    inline remote_region query(Handle handle, std::uint64_t address, std::error_code& ec);
+    template<class RegionAddress = std::uint64_t, class Address, class Handle>
+    inline basic_region<RegionAddress> query(Handle handle, Address address);
 
-    template<typename Handle>
-    inline std::vector<remote_region>
-    query_range(Handle handle, std::uint64_t begin, std::uint64_t end);
-    template<typename Handle>
-    inline std::vector<remote_region> query_range(Handle handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec);
+    template<class RegionAddress = std::uint64_t, class Address, class Handle>
+    inline basic_region<RegionAddress> query(Handle handle, Address address, std::error_code& ec);
+
+    template<class RegionAddress = std::uint64_t, class Address, class Handle>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Handle handle, Address begin, Address end);
+
+    template<class RegionAddress = std::uint64_t, class Address, class Handle>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Handle handle, Address begin, Address end, std::error_code& ec);
+
 }
 
 #if defined(_WIN32)
     #include "detail/windows/query.inl"
+    #include "detail/query_range_using_query.inl"
 #elif defined(__APPLE__)
     #include "detail/osx/query.inl"
+    // TODO on apple I can probably query ranges more efficiently
+    #include "detail/query_range_using_query.inl"
 #else
     #include "detail/linux/query.inl"
 #endif

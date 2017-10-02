@@ -17,34 +17,41 @@
 #ifndef VMU_QUERY_RANGE_USING_QUERY_INL
 #define VMU_QUERY_RANGE_USING_QUERY_INL
 
-#include "../../query.hpp"
+#include "../query.hpp"
+#include "../region.hpp"
 
 namespace vmu {
 
-    inline std::vector<local_region> query_range(std::uintptr_t begin, std::uintptr_t end)
+    template<class RegionAddress = std::uintptr_t, class Address>
+    inline std::vector<basic_region<RegionAddress>> query_range(Address begin, Address end)
     {
-        std::vector<local_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(begin));
-            begin = regions.back().end();
+        std::vector<basic_region<RegionAddress>> regions;
+        auto checked_begin     = detail::pointer_cast<RegionAddress>(begin);
+        const auto checked_end = detail::pointer_cast<RegionAddress>(end);
+
+        while (checked_begin < checked_end) {
+            regions.emplace_back(query<RegionAddress>(begin));
+            checked_begin = regions.back().end();
         }
 
         return regions;
-    }
-    inline std::vector<local_region>
-    query_range(std::uintptr_t begin, std::uintptr_t end, std::error_code& ec)
+    };
+
+    template<class RegionAddress = std::uintptr_t, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(Address begin, Address end, std::error_code& ec)
     {
         std::vector<local_region> regions;
         while (begin < end) {
-            regions.emplace_back(query(begin, ec));
-            if (ec)
-                return regions;
+        regions.emplace_back(query(begin, ec));
+        if (ec)
+        return regions;
 
-            begin = regions.back().end();
+        begin = regions.back().end();
         }
 
         return regions;
-    }
+    };
 
     template<typename Handle>
     inline std::vector<remote_region>
@@ -53,9 +60,6 @@ namespace vmu {
         std::vector<local_region> regions;
         while (begin < end) {
             regions.emplace_back(query(handle, begin));
-            if (ec)
-                return regions;
-
             begin = regions.back().end();
         }
 

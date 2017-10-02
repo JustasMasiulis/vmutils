@@ -76,8 +76,8 @@ namespace vmu { namespace detail {
                 , true};
     }
 
-    template<class Ptr, class Address>
-    inline basic_region<Ptr>
+    template<class RegionAddress, class Address>
+    inline basic_region<RegionAddress>
     query_impl(vm_map_t handle, Address address, std::error_code& ec)
     {
         // The address is aligned to the enclosing region
@@ -99,17 +99,15 @@ namespace vmu { namespace detail {
             ec = std::error_code(kr, std::system_category());
 
         if (region_base > address)
-            return {(Ptr) (region_base)
-                    , (Ptr) (region_size)
+            return {detail::pointer_cast<RegionAddress>(region_base)
+                    , detail::pointer_cast<RegionAddress>(region_size)
                     , protection::storage(0)
                     , false
                     , false
                     , false};
 
-        // cannot use reinterpret_cast because it will fail on stuff like unsigned long ->
-        // unsigned int etc
-        return {(Ptr) (region_base)
-                , (Ptr) (region_size)
+        return {detail::pointer_cast<RegionAddress>(region_base)
+                , detail::pointer_cast<RegionAddress>(region_size)
                 , info.protection
                 , detail::is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
@@ -126,7 +124,7 @@ namespace vmu {
         return detail::query_impl<RegionAddress>(::mach_task_self(), address);
     };
     template<class RegionAddress, class Address>
-    inline basic_region<RegionAddress> query(Address address, std::error_code& ec) noexcept
+    inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
         return detail::query_impl<RegionAddress>(::mach_task_self(), address, ec);
     }

@@ -131,7 +131,7 @@ namespace vmu {
                                                           , ec);
     }
 
-    template<class RegionAddress = std::uintptr_t, class Address, typename Handle>
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
     inline remote_region query(Handle handle, Address address)
     {
 #ifdef _WIN64
@@ -140,7 +140,7 @@ namespace vmu {
         return detail::query_impl<RegionAddress, detail::wow64_query>(handle, address);
 #endif
     }
-    template<class RegionAddress = std::uintptr_t, class Address, typename Handle>
+    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
     inline remote_region
     query(Handle handle, Address address, std::error_code& ec) noexcept
     {
