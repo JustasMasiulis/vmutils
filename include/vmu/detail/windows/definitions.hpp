@@ -56,6 +56,9 @@ namespace vmu { namespace detail {
     constexpr static unsigned long mem_free    = 0x10000;
     constexpr static unsigned long mem_reserve = 0x2000;
     constexpr static unsigned long mem_private = 0x20000;
+    constexpr static unsigned long page_guard  = 0x100;
+    constexpr static unsigned long no_access   = 0x01;
+    
 
 }} // namespace vmu::detail
 
