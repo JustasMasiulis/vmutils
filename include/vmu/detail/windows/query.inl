@@ -114,13 +114,13 @@ namespace vmu {
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
-        return detail::query_impl<RegionAddress, detail::native_query>(GetCurrentProcess()
+        return detail::query_impl<RegionAddress, detail::native_query>(detail::GetCurrentProcess()
                                                                        , address);
     }
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
-        return detail::query_impl<RegionAddress, detail::native_query>(GetCurrentProcess()
+        return detail::query_impl<RegionAddress, detail::native_query>(detail::GetCurrentProcess()
                                                                        , address
                                                                        , ec);
     }
