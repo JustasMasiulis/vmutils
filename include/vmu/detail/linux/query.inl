@@ -17,6 +17,7 @@
 #ifndef VMU_LINUX_QUERY_INL
 #define VMU_LINUX_QUERY_INL
 
+#include "../checked_pointers.hpp"
 #include "../../query.hpp"
 #include <fstream>
 #include <sys/types.h>
@@ -24,7 +25,7 @@
 
 namespace vmu { namespace detail {
 
-    inline vmu::protection::storage transform_prot(char prot[4]) noexcept
+    inline vmu::protection::storage transform_prot(char (&prot)[4]) noexcept
     {
         return {(prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)};
     }
@@ -53,7 +54,7 @@ namespace vmu { namespace detail {
         std::uint64_t end = 0;
         char          prot[4];
 
-        for (; map; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
+        for (; maps; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
             maps >> std::hex >> begin;
             // address is in free memory and the last end is the beginning of the region
             if (begin > address)
@@ -96,7 +97,7 @@ namespace vmu { namespace detail {
         char                                     prot[4];
         std::vector<basic_region<RegionAddress>> regions;
 
-        for (; map; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
+        for (; maps; maps.ignore(std::numeric_limits<std::streamsize>::max(), '\n')) {
             maps >> std::hex >> begin;
             if (begin > last)
                 break;
@@ -133,7 +134,8 @@ namespace vmu {
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
-        return query<RegionAddress>(::getpid(), address);
+        return query<RegionAddress>(::getpid(), detail::pointer_cast<std::uint64_t>
+                (address));
     }
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
@@ -153,8 +155,8 @@ namespace vmu {
     }
 
 
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
-    inline basic_region<RegionAddress> query(Handle handle, Address address)
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline basic_region<RegionAddress> query(native_handle_t handle, Address address)
     {
         std::ifstream maps;
         maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -163,8 +165,8 @@ namespace vmu {
         return detail::query_impl<RegionAddress>(maps,
                 detail::pointer_cast<std::uint64_t>(address));
     }
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
-    inline remote_region query(Handle handle, Address address, std::error_code& ec)
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline remote_region query(native_handle_t handle, Address address, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
@@ -176,9 +178,9 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(address));
     }
 
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
+    template<class RegionAddress = std::uint64_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
-    query_range(Handle handle, Address begin, Address end)
+    query_range(native_handle_t handle, Address begin, Address end)
     {
         std::ifstream maps;
         maps.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -188,8 +190,8 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(begin),
                 detail::pointer_cast<std::uint64_t>(end));
     }
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
-    inline std::vector<remote_region> query_range(Handle handle
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline std::vector<remote_region> query_range(native_handle_t handle
                                                   , Address begin
                                                   , Address end
                                                   , std::error_code& ec)

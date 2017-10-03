@@ -26,8 +26,8 @@ namespace vmu {
     inline std::vector<basic_region<RegionAddress>> query_range(Address begin, Address end)
     {
         std::vector<basic_region<RegionAddress>> regions;
-        auto checked_begin     = detail::pointer_cast<RegionAddress>(begin);
-        const auto checked_end = detail::pointer_cast<RegionAddress>(end);
+        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
             regions.emplace_back(query<RegionAddress>(begin));

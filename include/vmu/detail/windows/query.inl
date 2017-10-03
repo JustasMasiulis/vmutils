@@ -131,8 +131,8 @@ namespace vmu {
                                                           , ec);
     }
 
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
-    inline remote_region query(Handle handle, Address address)
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline basic_region<RegionAddress> query(native_handle_t handle, Address address)
     {
 #ifdef _WIN64
         return detail::query_impl<RegionAddress, detail::native_query>(handle, address);
@@ -140,9 +140,9 @@ namespace vmu {
         return detail::query_impl<RegionAddress, detail::wow64_query>(handle, address);
 #endif
     }
-    template<class RegionAddress = std::uint64_t, class Address, typename Handle>
-    inline remote_region
-    query(Handle handle, Address address, std::error_code& ec) noexcept
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline basic_region<RegionAddress>
+    query(native_handle_t handle, Address address, std::error_code& ec)
     {
 #ifdef _WIN64
         return detail::query_impl<RegionAddress, detail::native_query>(handle
