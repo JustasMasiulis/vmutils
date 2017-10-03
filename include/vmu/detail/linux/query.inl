@@ -58,8 +58,12 @@ namespace vmu { namespace detail {
             maps >> std::hex >> begin;
             // address is in free memory and the last end is the beginning of the region
             if (begin > address)
-                return {detail::pointer_cast<RegionAddress>(end), detail::pointer_cast<
-                        RegionAddress>(begin - end), 0, false, false, false};
+                return {pointer_cast<RegionAddress>(end)
+                        , pointer_cast<RegionAddress>(begin - end)
+                        , 0
+                        , false
+                        , false
+                        , false};
 
             // ignore the dash between addresses
             maps.ignore();
@@ -72,16 +76,16 @@ namespace vmu { namespace detail {
             maps.ignore();
             maps.read(prot, 4);
 
-            return {detail::pointer_cast<RegionAddress>(begin)
-                    , detail::pointer_cast<RegionAddress>(end - begin)
+            return {pointer_cast<RegionAddress>(begin)
+                    , pointer_cast<RegionAddress>(end - begin)
                     , transform_prot(prot)
                     , prot[3] != '-'
                     , false
                     , true};
         }
 
-        return {detail::pointer_cast<RegionAddress>(end)
-                , std::numeric_limits<detail::as_uintptr_t<RegionAddress>>::max()
+        return {pointer_cast<RegionAddress>(end)
+                , std::numeric_limits<as_uintptr_t<RegionAddress>>::max()
                 , 0
                 , false
                 , false

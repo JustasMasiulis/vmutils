@@ -28,7 +28,7 @@ namespace vmu {
 #elif defined(__apple__)
     using native_handle_t = ::mach_port_t;
 #else
-    using native_handle_t = int;
+    using native_handle_t = ::pid_t;
 #endif
 
     template<class RegionAddress = std::uintptr_t, class Address>
