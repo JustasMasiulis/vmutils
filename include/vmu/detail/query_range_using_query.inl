@@ -30,54 +30,61 @@ namespace vmu {
         const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
-            regions.emplace_back(query<RegionAddress>(begin));
+            regions.emplace_back(query<RegionAddress>(checked_begin));
             checked_begin = regions.back().end();
         }
 
         return regions;
-    };
+    }
 
     template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end, std::error_code& ec)
     {
-        std::vector<local_region> regions;
-        while (begin < end) {
-        regions.emplace_back(query(begin, ec));
-        if (ec)
-        return regions;
+        std::vector<basic_region<RegionAddress>> regions;
+        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
 
-        begin = regions.back().end();
-        }
-
-        return regions;
-    };
-
-    template<typename Handle>
-    inline std::vector<remote_region>
-    query_range(Handle handle, std::uint64_t begin, std::uint64_t end)
-    {
-        std::vector<local_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(handle, begin));
-            begin = regions.back().end();
+        while (checked_begin < checked_end) {
+            regions.emplace_back(query<RegionAddress>(checked_begin, ec));
+            if(ec)
+                return regions;
+            checked_begin = regions.back().end();
         }
 
         return regions;
     }
-    template<typename Handle>
-    inline std::vector<remote_region> query_range(Handle handle
-                                                  , std::uint64_t begin
-                                                  , std::uint64_t end
-                                                  , std::error_code& ec)
-    {
-        std::vector<local_region> regions;
-        while (begin < end) {
-            regions.emplace_back(query(handle, begin, ec));
-            if (ec)
-                return regions;
 
-            begin = regions.back().end();
+
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(native_handle_t handle, Address begin, Address end)
+    {
+        std::vector<basic_region<RegionAddress>> regions;
+        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+
+        while (checked_begin < checked_end) {
+            regions.emplace_back(query<RegionAddress>(handle, checked_begin));
+            checked_begin = regions.back().end();
+        }
+
+        return regions;
+    }
+
+    template<class RegionAddress = std::uint64_t, class Address>
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(native_handle_t handle, Address begin, Address end, std::error_code& ec)
+    {
+        std::vector<basic_region<RegionAddress>> regions;
+        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+
+        while (checked_begin < checked_end) {
+            regions.emplace_back(query<RegionAddress>(handle, checked_begin, ec));
+            if(ec)
+                return regions;
+            checked_begin = regions.back().end();
         }
 
         return regions;

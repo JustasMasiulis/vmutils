@@ -141,6 +141,7 @@ namespace vmu {
         return query<RegionAddress>(::getpid(), detail::pointer_cast<std::uint64_t>
                 (address));
     }
+    template<class RegionAddress = std::uintptr_t, class Address>
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
         return query<RegionAddress>(::getpid(), address, ec);
