@@ -85,7 +85,7 @@ namespace vmu { namespace detail {
         }
 
         return {pointer_cast<RegionAddress>(end)
-                , std::numeric_limits<as_uintptr_t<RegionAddress>>::max()
+                , std::numeric_limits<as_uintptr_t<sizeof(RegionAddress)>>::max()
                 , 0
                 , false
                 , false
@@ -154,13 +154,13 @@ namespace vmu {
     }
     template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
-    query_range(Address begin, Address, std::error_code& ec)
+    query_range(Address begin, Address end, std::error_code& ec)
     {
         return query_range<RegionAddress>(::getpid(), begin, end, ec);
     }
 
 
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(native_handle_t handle, Address address)
     {
         std::ifstream maps;
@@ -170,7 +170,7 @@ namespace vmu {
         return detail::query_impl<RegionAddress>(maps,
                 detail::pointer_cast<std::uint64_t>(address));
     }
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline remote_region query(native_handle_t handle, Address address, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
@@ -183,7 +183,7 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(address));
     }
 
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(native_handle_t handle, Address begin, Address end)
     {
@@ -195,7 +195,7 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(begin),
                 detail::pointer_cast<std::uint64_t>(end));
     }
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<remote_region> query_range(native_handle_t handle
                                                   , Address begin
                                                   , Address end

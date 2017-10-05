@@ -68,7 +68,7 @@ namespace vmu { namespace detail {
                     , false
                     , false};
 
-        return {detail::pointer_cast<RegionAddress>(region_base)(region_base)
+        return {detail::pointer_cast<RegionAddress>(region_base)
                 , detail::pointer_cast<RegionAddress>(region_size)
                 , info.protection
                 , is_shared(info.share_mode)

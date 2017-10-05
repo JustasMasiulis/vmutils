@@ -18,11 +18,10 @@
 #define VMU_QUERY_RANGE_USING_QUERY_INL
 
 #include "../query.hpp"
-#include "../region.hpp"
 
 namespace vmu {
 
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>> query_range(Address begin, Address end)
     {
         std::vector<basic_region<RegionAddress>> regions;
@@ -37,7 +36,7 @@ namespace vmu {
         return regions;
     }
 
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end, std::error_code& ec)
     {
@@ -56,7 +55,7 @@ namespace vmu {
     }
 
 
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(native_handle_t handle, Address begin, Address end)
     {
@@ -72,7 +71,7 @@ namespace vmu {
         return regions;
     }
 
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(native_handle_t handle, Address begin, Address end, std::error_code& ec)
     {
