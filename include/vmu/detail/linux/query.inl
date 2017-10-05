@@ -135,13 +135,13 @@ namespace vmu { namespace detail {
 
 namespace vmu {
 
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
         return query<RegionAddress>(::getpid(), detail::pointer_cast<std::uint64_t>
                 (address));
     }
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline local_region query(std::uintptr_t address, std::error_code& ec)
     {
         return query<RegionAddress>(::getpid(), address, ec);
