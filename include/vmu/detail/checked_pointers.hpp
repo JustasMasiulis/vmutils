@@ -20,31 +20,24 @@
 #include <stdexcept>
 #include <limits>
 
-namespace vmu { namespace detail {
-
-    #if defined(VMU_NO_PTR_CHECKING) || defined(__APPLE__) || INTPTR_MAX == INT64_MAX
-        constexpr static bool checked_pointers = false;
-    #else
-        constexpr static bool checked_pointers = true;
-    #endif
+namespace vmu { namespace detail { namespace impl {
 
     template<std::size_t S>
-    struct as_uintptr;
+    struct as_uintptr_of_size;
 
     template<>
-    struct as_uintptr<4> {
+    struct as_uintptr_of_size<4> {
         using type = std::uint32_t;
     };
     template<>
-    struct as_uintptr<8> {
+    struct as_uintptr_of_size<8> {
         using type = std::uint64_t;
     };
 
-    template<std::size_t Size>
-    using as_uintptr_t = typename as_uintptr<Size>::type;
-
     template<bool>
     struct pointer_checker {
+        constexpr static bool is_checked = false;
+
         template<class P2, class P1>
         inline static constexpr void check(P1) noexcept {}
     };
@@ -53,11 +46,13 @@ namespace vmu { namespace detail {
 
     template<>
     struct pointer_checker<true> {
+        constexpr static bool is_checked = true;
+
         template<class P2, class P1>
         inline static constexpr void check(P1 p1)
         {
-            if (reinterpret_cast<as_uintptr_t<sizeof(P1)>>(p1)
-                > std::numeric_limits<as_uintptr_t<sizeof(P2)>>::max())
+            if ((typename as_uintptr_of_size<sizeof(P1)>::type) (p1)
+                > std::numeric_limits<typename as_uintptr_of_size<sizeof(P2)>::type>::max())
                 throw std::overflow_error(
                         "attempt to cast to pointer of insufficient size");
         }
@@ -65,13 +60,55 @@ namespace vmu { namespace detail {
 
 #endif
 
-    template<typename Px, typename Py>
-    inline constexpr Px pointer_cast(Py ptr) noexcept(!checked_pointers)
-    {
-        using my_pointer_checker = pointer_checker<(sizeof(Py) > sizeof(Px))>;
-        my_pointer_checker::template check<Px>(ptr);
+}}}
 
-        return (Px) (ptr);
+namespace vmu { namespace detail {
+
+    #if defined(VMU_NO_PTR_CHECKING)
+        constexpr static bool checked_pointers = false;
+    #else
+        constexpr static bool checked_pointers = true;
+    #endif
+
+    template<class T>
+    using as_uintptr_t = typename impl::as_uintptr_of_size<sizeof(T)>::type;
+
+
+    template<typename Px, typename Py>
+    inline constexpr Px pointer_cast_unchecked(Py pointer) noexcept
+    {
+        // C style cast because reinterpret cast cannot do conversion from
+        // simple types like long to int.
+        // A cast like *reinterpret_cast<Px*>(&pointer); may produce UB due to
+        // differing alignment requirements
+        return (Px) (pointer);
+    }
+
+    template<typename Px, typename Py>
+    inline constexpr Px pointer_cast(Py pointer) noexcept(!checked_pointers)
+    {
+        using my_pointer_checker = impl::pointer_checker<(sizeof(Py) > sizeof(Px))>;
+        my_pointer_checker::template check<Px>(pointer);
+
+        return pointer_cast_unchecked<Px>(pointer);
+    }
+
+
+    // TODO do some TMP to avoid casts in some cases
+    template<class Address>
+    inline constexpr Address advance_ptr(Address pointer, Address size) noexcept
+    {
+        return pointer_cast_unchecked<Address>(
+                pointer_cast_unchecked<as_uintptr_t<Address>>(pointer)
+                + pointer_cast_unchecked<as_uintptr_t<Address>>(size));
+    }
+
+    template<class Address>
+    inline constexpr Address ptr_distance(Address p1, Address p2) noexcept
+    {
+        return pointer_cast_unchecked<Address>(
+                pointer_cast_unchecked<as_uintptr_t<Address>>(p1)
+                - pointer_cast_unchecked<as_uintptr_t<Address>>(p2));
     }
 
 }}

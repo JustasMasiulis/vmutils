@@ -17,8 +17,9 @@
 #ifndef VMU_VMU_HPP
 #define VMU_VMU_HPP
 
-#include "vmu/protection.hpp"
+// TODO use is_checked inside pointer_checker instead of checked_pointers
+
 #include "vmu/query.hpp"
-#include "vmu/region.hpp"
+#include "vmu/protection_guard.hpp"
 
 #endif // include guard

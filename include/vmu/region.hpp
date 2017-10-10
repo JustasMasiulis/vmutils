@@ -17,8 +17,8 @@
 #ifndef VMU_REGION_HPP
 #define VMU_REGION_HPP
 
-#include <cstdint>
 #include "protection.hpp"
+#include "detail/checked_pointers.hpp"
 
 namespace vmu {
 
@@ -56,7 +56,7 @@ namespace vmu {
 
         constexpr Ptr begin() const noexcept { return base_address; }
 
-        constexpr Ptr end() const noexcept { return base_address + size; }
+        constexpr Ptr end() const noexcept { return detail::advance_ptr(base_address, size); }
 
         constexpr explicit operator bool() const noexcept { return in_use; }
     };

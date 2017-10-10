@@ -50,6 +50,12 @@ namespace vmu { namespace detail {
                    , MEMORY_BASIC_INFORMATION* buffer
                    , ULONG_PTR_ size_of_info);
 
+
+    extern "C" __declspec(dllimport) int __stdcall VirtualProtect(void* address
+                                                                  , ULONG_PTR_ size
+                                                                  , unsigned long new_protection
+                                                                  , unsigned long* old_protection);
+
     extern "C" __declspec(dllimport) void __stdcall GetSystemInfo(SYSTEM_INFO* info);
     
     extern "C" __declspec(dllimport) void* __stdcall GetCurrentProcess();
