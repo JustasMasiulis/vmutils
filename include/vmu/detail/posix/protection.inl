@@ -23,7 +23,7 @@ namespace vmu {
 
     constexpr inline native_protection_t to_native(access flags)
     {
-        return static_cast<native_protection_t>(access);
+        return static_cast<native_protection_t>(flags);
     }
 
     constexpr inline access from_native(native_protection_t my_flags)
