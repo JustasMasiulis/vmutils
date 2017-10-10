@@ -71,6 +71,8 @@ TEST_CASE("query_range error code")
 
 TEST_CASE("protection_guard")
 {
+    // needed on linux
+    memset(testing_arr, 1, 8200);
     auto result = vmu::query(testing_arr);
     REQUIRE(result);
 
