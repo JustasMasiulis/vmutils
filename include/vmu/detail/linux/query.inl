@@ -85,7 +85,8 @@ namespace vmu { namespace detail {
         }
 
         return {pointer_cast<RegionAddress>(end)
-                , std::numeric_limits<as_uintptr_t<sizeof(RegionAddress)>>::max()
+                , detail::pointer_cast_unchecked<RegionAddress>(
+                        std::numeric_limits<as_uintptr_t<RegionAddress>>::max())
                 , 0
                 , false
                 , false
@@ -142,7 +143,7 @@ namespace vmu {
                 (address));
     }
     template<class RegionAddress, class Address>
-    inline local_region query(std::uintptr_t address, std::error_code& ec)
+    inline local_region query(Address address, std::error_code& ec)
     {
         return query<RegionAddress>(::getpid(), address, ec);
     }
@@ -196,10 +197,8 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(end));
     }
     template<class RegionAddress, class Address>
-    inline std::vector<remote_region> query_range(native_handle_t handle
-                                                  , Address begin
-                                                  , Address end
-                                                  , std::error_code& ec)
+    inline std::vector<basic_region<RegionAddress>>
+    query_range(native_handle_t handle, Address begin, Address end, std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {
