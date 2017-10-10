@@ -172,7 +172,9 @@ namespace vmu {
                 detail::pointer_cast<std::uint64_t>(address));
     }
     template<class RegionAddress, class Address>
-    inline remote_region query(native_handle_t handle, Address address, std::error_code& ec)
+    inline basic_region<RegionAddress> query(native_handle_t handle
+                                             , Address address
+                                             , std::error_code& ec)
     {
         std::ifstream maps("/proc/" + std::to_string(static_cast<int>(handle)) + "/maps");
         if (!maps.is_open()) {

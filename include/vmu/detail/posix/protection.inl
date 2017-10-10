@@ -21,34 +21,34 @@
 
 namespace vmu { namespace protection {
 
-    constexpr inline native_protection_t to_native(flags flags)
+    constexpr inline native_protection_t to_native(access flags)
     {
-        return static_cast<native_protection_t>(flags);
+        return static_cast<native_protection_t>(access);
     }
 
-    constexpr inline flags from_native(native_protection_t my_flags)
+    constexpr inline access from_native(native_protection_t my_flags)
     {
-        return static_cast<flags>(my_flags);
+        return static_cast<access>(my_flags);
     }
 
-    constexpr bool storage::accessible() const noexcept
+    constexpr bool protection_t::accessible() const noexcept
     {
         return _native != 0;
     }
 
-    constexpr bool storage::readable() const noexcept
+    constexpr bool protection_t::readable() const noexcept
     {
-        return (_native & static_cast<native_protection_t>(flags::read));
+        return (_native & static_cast<native_protection_t>(access::read));
     }
 
-    constexpr bool storage::writable() const noexcept
+    constexpr bool protection_t::writable() const noexcept
     {
-        return (_native & static_cast<native_protection_t>(flags::write));
+        return (_native & static_cast<native_protection_t>(access::write));
     }
 
-    constexpr bool storage::executable() const noexcept
+    constexpr bool protection_t::executable() const noexcept
     {
-        return (_native & static_cast<native_protection_t>(flags::exec));
+        return (_native & static_cast<native_protection_t>(access::exec));
     }
 
 }} // namespace vmu::protection
