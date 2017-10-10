@@ -19,7 +19,7 @@
 
 #include "../../protection.hpp"
 
-namespace vmu { namespace protection {
+namespace vmu {
 
     constexpr inline native_protection_t to_native(access flags)
     {
@@ -51,6 +51,6 @@ namespace vmu { namespace protection {
         return (_native & static_cast<native_protection_t>(access::exec));
     }
 
-}} // namespace vmu::protection
+} // namespace vmu
 
-#endif // !VMU_POSIX_PROTECTION_INL
+#endif // include guard
