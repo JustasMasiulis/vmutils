@@ -63,7 +63,7 @@ namespace vmu { namespace detail {
         if (region_base > address)
             return {detail::pointer_cast<RegionAddress>(region_base)
                     , detail::pointer_cast<RegionAddress>(region_size)
-                    , protection::storage(0)
+                    , protection_t(0)
                     , false
                     , false
                     , false};
@@ -101,7 +101,7 @@ namespace vmu { namespace detail {
         if (region_base > address)
             return {detail::pointer_cast<RegionAddress>(region_base)
                     , detail::pointer_cast<RegionAddress>(region_size)
-                    , protection::storage(0)
+                    , protection_t(0)
                     , false
                     , false
                     , false};

@@ -25,32 +25,54 @@
 
 namespace vmu {
 
-    template<class Address>
-    inline void protect(Address begin, Address end, protection::storage prot)
+    inline std::size_t page_size() noexcept
     {
-        static const auto page_size = ::sysconf(_SC_PAGESIZE);
-        const auto        address   = (detail::pointer_cast<std::uintptr_t>(begin) & -page_size);
+        // theoretically this may fail but don't think that this could happen in practice
+        const static auto size = static_cast<std::size_t>(::sysconf(_SC_PAGESIZE));
+        return size;
+    }
+
+    template<class Address>
+    inline void protect(Address begin, Address end, protection_t prot)
+    {
+        if (begin == end)
+            return;
+
+        const auto address = (detail::pointer_cast<std::uintptr_t>(begin) & -page_size());
 
         if (::mprotect(detail::pointer_cast_unchecked<void*>(address)
-                       , detail::pointer_cast_unchecked<std::size_t>(detail::ptr_distance(end, begin))
+                       , detail::pointer_cast<std::size_t>(end) - address
                        , prot.native()) == -1)
-            throw std::system_error(std::error_code(errno, std::system_category()), "mprotect() failed");
+            throw std::system_error(std::error_code(errno, std::system_category())
+                                    , "mprotect() failed");
     }
 
 
     template<class Address>
     inline void
-    protect(Address begin, Address end, protection::storage prot, std::error_code& ec)
+    protect(Address begin, Address end, protection_t prot, std::error_code& ec)
     {
-        static const auto page_size = ::sysconf(_SC_PAGESIZE);
-        const auto address = (detail::pointer_cast<std::uintptr_t>(begin) & -page_size);
+        if(begin == end)
+            return;
+
+        const auto address = (detail::pointer_cast<std::uintptr_t>(begin) & -page_size());
 
         if (::mprotect(detail::pointer_cast_unchecked<void*>(address)
-                       , detail::pointer_cast_unchecked<std::size_t>(detail::ptr_distance(end, begin))
+                       , detail::pointer_cast<std::size_t>(end) - address
                        , prot.native()) == -1)
             ec = std::error_code(errno, std::system_category());
     }
 
 } // namespace vmu
+
+namespace vmu { namespace detail {
+
+    template<class Address>
+    inline auto fix_singular_address(Address address)
+    {
+        return detail::cast_to_uintptr(address);
+    }
+
+}}
 
 #endif // include guard

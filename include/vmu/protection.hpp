@@ -27,30 +27,30 @@ namespace vmu {
 
 }
 
-namespace vmu { namespace protection {
+namespace vmu {
 
-    enum class flags : native_protection_t {
+    enum class access : native_protection_t {
         none = 0, read = 1, write = 2, exec = 4
     };
 
 
-    constexpr inline native_protection_t to_native(flags flags);
+    constexpr inline native_protection_t to_native(access flags);
 
 
-    constexpr inline flags from_native(native_protection_t flags);
+    constexpr inline access from_native(native_protection_t flags);
 
 
-    class storage {
+    class protection_t {
         native_protection_t _native;
 
     public:
-        explicit constexpr storage()
+        explicit constexpr protection_t()
                 : _native() {}
 
-        constexpr storage(flags flags)
+        constexpr protection_t(access flags)
                 : _native(to_native(flags)) {}
 
-        constexpr storage(native_protection_t native) noexcept
+        constexpr protection_t(native_protection_t native) noexcept
                 : _native(native) {}
 
         constexpr bool accessible() const noexcept;
@@ -59,61 +59,61 @@ namespace vmu { namespace protection {
         constexpr bool executable() const noexcept;
 
         constexpr native_protection_t native() const noexcept { return _native; }
-        constexpr flags to_flags() const { return from_native(_native); }
+        constexpr access to_flags() const { return from_native(_native); }
 
         constexpr operator const native_protection_t&() const noexcept { return _native; }
         constexpr operator native_protection_t&() noexcept { return _native; }
     };
 
 
-    constexpr flags operator|(flags lhs, flags rhs) noexcept
+    constexpr access operator|(access lhs, access rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+        return static_cast<access>(static_cast<native_protection_t>(lhs)
                                   | static_cast<native_protection_t>(rhs));
     }
 
-    constexpr flags operator&(flags lhs, flags rhs) noexcept
+    constexpr access operator&(access lhs, access rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+        return static_cast<access>(static_cast<native_protection_t>(lhs)
                                   & static_cast<native_protection_t>(rhs));
     }
 
-    constexpr flags operator^(flags lhs, flags rhs) noexcept
+    constexpr access operator^(access lhs, access rhs) noexcept
     {
-        return static_cast<flags>(static_cast<native_protection_t>(lhs)
+        return static_cast<access>(static_cast<native_protection_t>(lhs)
                                   ^ static_cast<native_protection_t>(rhs));
     }
 
-    constexpr flags operator~(flags rhs) noexcept
+    constexpr access operator~(access rhs) noexcept
     {
-        return static_cast<flags>(~static_cast<native_protection_t>(rhs));
+        return static_cast<access>(~static_cast<native_protection_t>(rhs));
     }
 
-    constexpr flags& operator|=(flags& lhs, flags rhs) noexcept
+    constexpr access& operator|=(access& lhs, access rhs) noexcept
     {
-        lhs = static_cast<flags> (static_cast<native_protection_t>(lhs)
+        lhs = static_cast<access> (static_cast<native_protection_t>(lhs)
                                   | static_cast<native_protection_t>(rhs));
 
         return lhs;
     }
 
-    constexpr flags& operator&=(flags& lhs, flags rhs) noexcept
+    constexpr access& operator&=(access& lhs, access rhs) noexcept
     {
-        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs)
+        lhs = static_cast<access>(static_cast<native_protection_t>(lhs)
                                  & static_cast<native_protection_t>(rhs));
 
         return lhs;
     }
 
-    constexpr flags& operator^=(flags& lhs, flags rhs) noexcept
+    constexpr access& operator^=(access& lhs, access rhs) noexcept
     {
-        lhs = static_cast<flags>(static_cast<native_protection_t>(lhs)
+        lhs = static_cast<access>(static_cast<native_protection_t>(lhs)
                                  ^ static_cast<native_protection_t>(rhs));
 
         return lhs;
     }
 
-}}
+}
 
 #ifdef _WIN32
 

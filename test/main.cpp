@@ -1,6 +1,8 @@
 #include <catch_with_main.hpp>
 #include <vmu.hpp>
 
+volatile char testing_arr[8200];
+
 TEST_CASE("query")
 {
     int  i     = 5;
@@ -13,7 +15,6 @@ TEST_CASE("query")
     CHECK(ret.base_address <= ptr_i);
     CHECK(ret.size != 0);
     CHECK(ret.base_address + ret.size >= ptr_i);
-    CHECK(ret.end() == ret.base_address + ret.size);
 }
 
 TEST_CASE("query error code")
@@ -30,7 +31,6 @@ TEST_CASE("query error code")
     CHECK(ret.base_address <= ptr_i);
     CHECK(ret.size != 0);
     CHECK(ret.base_address + ret.size >= ptr_i);
-    CHECK(ret.end() == ret.base_address + ret.size);
 }
 
 TEST_CASE("query_range")
@@ -47,7 +47,6 @@ TEST_CASE("query_range")
         CHECK(ret.base_address <= ptr);
         CHECK(ret.size != 0);
         CHECK(ret.base_address + ret.size >= ptr);
-        CHECK(ret.end() == ret.base_address + ret.size);
     }
 }
 
@@ -67,6 +66,30 @@ TEST_CASE("query_range error code")
         CHECK(ret.base_address <= ptr);
         CHECK(ret.size != 0);
         CHECK(ret.base_address + ret.size >= ptr);
-        CHECK(ret.end() == ret.base_address + ret.size);
     }
+}
+
+TEST_CASE("protection_guard")
+{
+    auto result = vmu::query(testing_arr);
+    REQUIRE(result);
+
+    // TODO using FlushInstructionCache might be a thing to do
+    {
+        const auto new_prot = vmu::access::none;
+        CHECK_FALSE(new_prot == result.prot.to_flags());
+
+        vmu::protection_guard pg(testing_arr, new_prot);
+
+        auto new_flags = vmu::query(testing_arr);
+        REQUIRE(new_flags);
+        REQUIRE(new_flags.prot.to_flags() == new_prot);
+    }
+
+    auto result2 = vmu::query(testing_arr);
+    REQUIRE(result2.shared == result.shared);
+    REQUIRE(result2.in_use == result.in_use);
+    REQUIRE(result2.base_address == result.base_address);
+    REQUIRE(result2.prot.to_flags() == result.prot.to_flags());
+    REQUIRE(result2.guarded == result.guarded);
 }

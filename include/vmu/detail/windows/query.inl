@@ -23,13 +23,6 @@
 
 namespace vmu { namespace detail {
 
-    inline unsigned long page_size_impl() noexcept
-    {
-        SYSTEM_INFO info;
-        GetSystemInfo(&info);
-        return info.dwPageSize;
-    }
-
     template<class RegionAddress, class InfoT>
     inline basic_region<RegionAddress> parse_info(InfoT& info) noexcept
     {
@@ -107,13 +100,6 @@ namespace vmu { namespace detail {
 }}
 
 namespace vmu {
-
-    inline unsigned long page_size() noexcept
-    {
-        const static auto size = detail::page_size_impl();
-        return size;
-    }
-
 
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address)

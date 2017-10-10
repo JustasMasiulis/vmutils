@@ -25,7 +25,7 @@
 
 namespace vmu { namespace detail {
 
-    inline vmu::protection::storage transform_prot(char (&prot)[4]) noexcept
+    inline vmu::protection_t transform_prot(char (&prot)[4]) noexcept
     {
         return {(prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)};
     }
@@ -143,7 +143,7 @@ namespace vmu {
                 (address));
     }
     template<class RegionAddress, class Address>
-    inline local_region query(Address address, std::error_code& ec)
+    inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
         return query<RegionAddress>(::getpid(), address, ec);
     }

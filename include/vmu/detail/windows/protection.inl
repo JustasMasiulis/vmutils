@@ -21,59 +21,59 @@
 #include <stdexcept>
 #include <string>
 
-namespace vmu { namespace protection {
+namespace vmu {
 
-    constexpr inline native_protection_t to_native(flags flags)
+    constexpr inline native_protection_t to_native(access flags)
     {
         switch (flags)
         {
-        case flags::none:
+        case access::none:
             return PAGE_NOACCESS;
-        case flags::read:
+        case access::read:
             return PAGE_READONLY;
-        case flags::write: // no writeonly
+        case access::write: // no writeonly
             return PAGE_READWRITE;
-        case flags::exec:
+        case access::exec:
             return PAGE_EXECUTE;
-        case flags::read | flags::write:
+        case access::read | access::write:
             return PAGE_READWRITE;
-        case flags::read | flags::exec:
+        case access::read | access::exec:
             return PAGE_EXECUTE;
-        case flags::write | flags::exec:
-        case flags::read | flags::write | flags::exec:
+        case access::write | access::exec:
+        case access::read | access::write | access::exec:
             return PAGE_EXECUTE_READWRITE;
         default:
-            throw std::logic_error("unknown protection flags combination");
+            throw std::logic_error("unknown protection access combination");
         }
     }
 
-    constexpr inline flags from_native(native_protection_t flags)
+    constexpr inline access from_native(native_protection_t flags)
     {
         switch (flags & (~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE)))
         {
         case PAGE_NOACCESS:
-            return flags::none;
+            return access::none;
         case PAGE_READONLY:
-            return flags::read;
+            return access::read;
         case PAGE_EXECUTE:
-            return flags::exec;
+            return access::exec;
         case PAGE_READWRITE: case PAGE_WRITECOPY:
-            return (flags::read | flags::write);
+            return (access::read | access::write);
         case PAGE_EXECUTE_READ:
-            return (flags::read | flags::exec);
+            return (access::read | access::exec);
         case PAGE_EXECUTE_READWRITE: case PAGE_EXECUTE_WRITECOPY:
-            return (flags::read | flags::write | flags::exec);
+            return (access::read | access::write | access::exec);
         default:
             throw std::range_error("unknown protection constant: " + std::to_string(flags));
         }
     }
 
-    constexpr bool storage::accessible() const noexcept
+    constexpr bool protection_t::accessible() const noexcept
     {
         return !(_native & PAGE_NOACCESS);
     }
 
-    constexpr bool storage::readable() const noexcept
+    constexpr bool protection_t::readable() const noexcept
     {
         return accessible()
             && ((_native & PAGE_READWRITE)
@@ -84,7 +84,7 @@ namespace vmu { namespace protection {
                 || (_native & PAGE_WRITECOPY));
     }
 
-    constexpr bool storage::writable() const noexcept
+    constexpr bool protection_t::writable() const noexcept
     {
         return accessible()
             && ((_native & PAGE_READWRITE)
@@ -93,7 +93,7 @@ namespace vmu { namespace protection {
                 || (_native & PAGE_WRITECOPY));
     }
 
-    constexpr bool storage::executable() const noexcept
+    constexpr bool protection_t::executable() const noexcept
     {
         return accessible()
             && ((_native & PAGE_EXECUTE_READ)
@@ -102,6 +102,6 @@ namespace vmu { namespace protection {
                 || (_native & PAGE_EXECUTE_WRITECOPY));
     }
 
-}} // namespace vmu::protection
+} // namespace vmu
 
 #endif // include guard

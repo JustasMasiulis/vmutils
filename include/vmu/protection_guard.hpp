@@ -33,8 +33,26 @@ namespace vmu {
 
         std::vector<old_prot_storage> _old;
     public:
+
+        /// \brief Restores the memory protection to its previous state
+        ~protection_guard()
+        {
+            std::error_code ec;
+            for (const auto& ele : _old)
+                protect(ele.begin, ele.end, ele.prot, ec);
+        }
+
         template<class Address>
-        protection_guard(Address begin, Address end, protection::storage prot)
+        protection_guard(Address address, protection_t prot)
+        {
+            _old.reserve(1);
+            auto old = query<std::uintptr_t>(address);
+            _old.push_back({old.begin(), old.end(), old.prot});
+            protect(address, prot);
+        }
+
+        template<class Address>
+        protection_guard(Address begin, Address end, protection_t prot)
         {
             auto regions = query_range(begin, end);
             _old.reserve(regions.size());
@@ -47,32 +65,25 @@ namespace vmu {
         }
 
         template<class Address>
-        protection_guard(const basic_region<Address>& r, protection::storage prot)
+        protection_guard(const basic_region<Address>& r, protection_t prot)
                 : protection_guard(r.begin(), r.end(), prot) {}
 
         template<class Address>
         protection_guard(Address begin
                          , Address end
-                         , protection::storage restore_to
+                         , protection_t restore_to
                          , adopt_protection_t)
         {
             _old.reserve(1);
-            _old.emplace_back(begin, end, restore_to);
+            _old.emplace_back(detail::pointer_cast_unchecked<std::uintptr_t>(begin)
+                              , detail::pointer_cast<std::uintptr_t>(end)
+                              , restore_to);
         }
 
         template<class Address>
-        protection_guard(const basic_region<Address>& r
-                         , protection::storage prot
-                         , adopt_protection_t)
+        protection_guard(const basic_region<Address>& r, protection_t prot, adopt_protection_t)
                 : protection_guard(r.begin, r.end, prot, adopt_protection_t{}) {}
 
-        /// \brief Restores the memory protection to its previous state
-        ~protection_guard()
-        {
-            std::error_code ec;
-            for (const auto& ele : _old)
-                protect(ele.begin, ele.end, ele.prot, ec);
-        }
 
         /// \brief not copy constructible
         protection_guard(const protection_guard&) = delete;

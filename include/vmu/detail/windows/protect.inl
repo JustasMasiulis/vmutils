@@ -23,14 +23,27 @@
 
 namespace vmu {
 
-    template<class Address>
-    inline void protect(Address begin, Address end, protection::storage prot)
+    inline std::size_t page_size() noexcept
     {
+        const static auto ps = [] {
+            SYSTEM_INFO info;
+            GetSystemInfo(&info);
+            return static_cast<std::size_t>(info.dwPageSize);
+        }();
+
+        return ps;
+    }
+
+    template<class Address>
+    inline void protect(Address begin, Address end, protection_t prot)
+    {
+        if (begin == end)
+            return;
+
         unsigned long old;
         const auto    size = detail::pointer_cast<detail::ULONG_PTR_>(end)
                              - detail::pointer_cast_unchecked<detail::ULONG_PTR_>(begin);
 
-        // end is checked. If begin is bigger than end the problem's on you
         if (detail::VirtualProtect(detail::pointer_cast_unchecked<void*>(begin)
                                    , size
                                    , prot.native()
@@ -41,8 +54,11 @@ namespace vmu {
 
     template<class Address>
     inline void
-    protect(Address begin, Address end, protection::storage prot, std::error_code& ec)
+    protect(Address begin, Address end, protection_t prot, std::error_code& ec)
     {
+        if (begin == end)
+            return;
+
         unsigned long old;
         const auto    size = detail::pointer_cast<detail::ULONG_PTR_>(end)
                              - detail::pointer_cast_unchecked<detail::ULONG_PTR_>(begin);
@@ -53,7 +69,6 @@ namespace vmu {
                                    , &old) == 0)
             ec = detail::get_last_error();
     }
-
 } // namespace vmu
 
 #endif // include guard

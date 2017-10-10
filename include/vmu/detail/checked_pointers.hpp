@@ -111,6 +111,12 @@ namespace vmu { namespace detail {
                 - pointer_cast_unchecked<as_uintptr_t<Address>>(p2));
     }
 
+    template<class Address>
+    inline constexpr auto cast_to_uintptr(Address address)
+    {
+        return pointer_cast_unchecked<as_uintptr_t<Address>>(address);
+    }
+
 }}
 
 #endif // include guard

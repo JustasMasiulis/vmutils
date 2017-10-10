@@ -22,27 +22,37 @@
 
 namespace vmu {
 
+    inline std::size_t page_size() noexcept;
+
+
     template<class Address>
-    inline void protect(Address begin, Address end, protection::storage prot);
+    inline void protect(Address begin, Address end, protection_t prot);
 
     template<class Address>
     inline void protect(Address begin
                         , Address end
-                        , protection::storage prot
+                        , protection_t prot
                         , std::error_code& ec);
 
-    template<class Range>
-    inline void protect(const Range& range, protection::storage prot)
+
+    template<class Address>
+    inline void protect(Address address, protection_t prot)
     {
-        protect(range.begin(), range.end(), prot);
+        auto fixed_address = detail::cast_to_uintptr(address);
+#ifdef _WIN32
+        fixed_address &= -page_size();
+#endif
+        protect(fixed_address, fixed_address + 1, prot);
     }
 
-
-    template<class Range>
-    inline void
-    protect(const Range& range, protection::storage prot, std::error_code& ec)
+    template<class Address>
+    inline void protect(Address address, protection_t prot, std::error_code& ec)
     {
-        protect(range.begin(), range.end(), prot, ec);
+        auto fixed_address = detail::cast_to_uintptr(address);
+#ifdef _WIN32
+        fixed_address &= -page_size();
+#endif
+        protect(fixed_address, fixed_address + 1, prot, ec);
     }
 
 } // namespace vmu

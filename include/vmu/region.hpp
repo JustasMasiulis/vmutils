@@ -36,7 +36,7 @@ namespace vmu {
 
         constexpr basic_region(Ptr base_
                                , Ptr size_
-                               , protection::storage protection
+                               , protection_t protection
                                , bool shared_
                                , bool guarded_
                                , bool in_use_) noexcept
@@ -47,16 +47,21 @@ namespace vmu {
                 , guarded(guarded_)
                 , in_use(in_use_) {}
 
-        Ptr                 base_address;
-        Ptr                 size;
-        protection::storage prot{};
-        bool                shared;
-        bool                guarded;
-        bool                in_use;
+        Ptr          base_address;
+        Ptr          size;
+        protection_t prot{};
+        bool         shared;
+        bool         guarded;
+        bool         in_use;
 
         constexpr Ptr begin() const noexcept { return base_address; }
 
-        constexpr Ptr end() const noexcept { return detail::advance_ptr(base_address, size); }
+        constexpr Ptr end() const noexcept
+        {
+            return detail::pointer_cast_unchecked<Ptr>(detail::cast_to_uintptr(base_address)
+                                                       + detail::cast_to_uintptr(size)
+                                                       + 1); // 1 past the end
+        }
 
         constexpr explicit operator bool() const noexcept { return in_use; }
     };
