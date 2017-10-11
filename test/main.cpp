@@ -1,7 +1,7 @@
 #include <catch_with_main.hpp>
 #include <vmu.hpp>
 
-volatile char testing_arr[8200];
+unsigned char testing_arr[8200];
 
 TEST_CASE("query")
 {
