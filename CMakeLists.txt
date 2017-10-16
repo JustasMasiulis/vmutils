@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(detail_header_files
         ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/query_range_using_query.inl
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/checked_pointers.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/address_cast.hpp
 
         ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/windows/query.inl
         ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/windows/protect.inl

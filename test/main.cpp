@@ -1,8 +1,6 @@
 #include <catch_with_main.hpp>
 #include <vmu.hpp>
 
-unsigned char testing_arr[8200];
-
 TEST_CASE("query")
 {
     int  i     = 5;
@@ -71,21 +69,29 @@ TEST_CASE("query_range error code")
 
 TEST_CASE("protection_guard")
 {
+    auto random_data = std::make_unique<volatile unsigned char[]>(4096 * 3);
+    volatile auto testing_arr = random_data.get();
     // needed on linux
-    memset(testing_arr, 1, 8200);
+    memset((void*)testing_arr, 12, 4096 * 3);
     auto result = vmu::query(testing_arr);
     REQUIRE(result);
 
     // TODO using FlushInstructionCache might be a thing to do
-    {
-        const auto new_prot = vmu::access::none;
+    try {
+        const auto new_prot = vmu::access::read;
         CHECK_FALSE(new_prot == result.prot.to_flags());
 
         vmu::protection_guard pg(testing_arr, new_prot);
 
         auto new_flags = vmu::query(testing_arr);
-        REQUIRE(new_flags);
-        REQUIRE(new_flags.prot.to_flags() == new_prot);
+        CHECK(new_flags);
+        CHECK(new_flags.prot.to_flags() == new_prot);
+        pg.restore();
+    }
+    catch(std::system_error& e)
+    {
+        FAIL_CHECK(e.what() << e.code());
+        vmu::protect(testing_arr, result.prot.native());
     }
 
     auto result2 = vmu::query(testing_arr);

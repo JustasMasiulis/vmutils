@@ -25,8 +25,8 @@ namespace vmu {
     inline std::vector<basic_region<RegionAddress>> query_range(Address begin, Address end)
     {
         std::vector<basic_region<RegionAddress>> regions;
-        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
-        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+        auto       checked_begin = detail::address_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::address_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
             regions.emplace_back(query<RegionAddress>(checked_begin));
@@ -41,8 +41,8 @@ namespace vmu {
     query_range(Address begin, Address end, std::error_code& ec)
     {
         std::vector<basic_region<RegionAddress>> regions;
-        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
-        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+        auto       checked_begin = detail::address_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::address_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
             regions.emplace_back(query<RegionAddress>(checked_begin, ec));
@@ -60,8 +60,8 @@ namespace vmu {
     query_range(native_handle_t handle, Address begin, Address end)
     {
         std::vector<basic_region<RegionAddress>> regions;
-        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
-        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+        auto       checked_begin = detail::address_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::address_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
             regions.emplace_back(query<RegionAddress>(handle, checked_begin));
@@ -76,8 +76,8 @@ namespace vmu {
     query_range(native_handle_t handle, Address begin, Address end, std::error_code& ec)
     {
         std::vector<basic_region<RegionAddress>> regions;
-        auto       checked_begin = detail::pointer_cast<RegionAddress>(begin);
-        const auto checked_end   = detail::pointer_cast<RegionAddress>(end);
+        auto       checked_begin = detail::address_cast<RegionAddress>(begin);
+        const auto checked_end   = detail::address_cast<RegionAddress>(end);
 
         while (checked_begin < checked_end) {
             regions.emplace_back(query<RegionAddress>(handle, checked_begin, ec));

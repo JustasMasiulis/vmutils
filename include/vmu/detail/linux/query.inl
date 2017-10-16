@@ -17,7 +17,7 @@
 #ifndef VMU_LINUX_QUERY_INL
 #define VMU_LINUX_QUERY_INL
 
-#include "../checked_pointers.hpp"
+#include "vmu/detail/address_cast.hpp"
 #include "../../query.hpp"
 #include <fstream>
 #include <sys/types.h>
@@ -58,8 +58,8 @@ namespace vmu { namespace detail {
             maps >> std::hex >> begin;
             // address is in free memory and the last end is the beginning of the region
             if (begin > address)
-                return {pointer_cast<RegionAddress>(end)
-                        , pointer_cast<RegionAddress>(begin - end)
+                return {address_cast<RegionAddress>(end)
+                        , address_cast<RegionAddress>(begin - end)
                         , 0
                         , false
                         , false
@@ -76,16 +76,16 @@ namespace vmu { namespace detail {
             maps.ignore();
             maps.read(prot, 4);
 
-            return {pointer_cast<RegionAddress>(begin)
-                    , pointer_cast<RegionAddress>(end - begin)
+            return {address_cast<RegionAddress>(begin)
+                    , address_cast<RegionAddress>(end - begin)
                     , transform_prot(prot)
                     , prot[3] != '-'
                     , false
                     , true};
         }
 
-        return {pointer_cast<RegionAddress>(end)
-                , detail::pointer_cast_unchecked<RegionAddress>(
+        return {address_cast<RegionAddress>(end)
+                , detail::address_cast_unchecked<RegionAddress>(
                         std::numeric_limits<as_uintptr_t<RegionAddress>>::max())
                 , 0
                 , false
@@ -118,8 +118,8 @@ namespace vmu { namespace detail {
             maps.ignore();
             maps.read(prot, 4);
 
-            regions.emplace_back(detail::pointer_cast<RegionAddress>(begin)
-                                 , detail::pointer_cast<RegionAddress>(end - begin)
+            regions.emplace_back(detail::address_cast<RegionAddress>(begin)
+                                 , detail::address_cast<RegionAddress>(end - begin)
                                  , transform_prot(prot)
                                  , prot[3] != '-'
                                  , false
@@ -139,7 +139,7 @@ namespace vmu {
     template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
-        return query<RegionAddress>(::getpid(), detail::pointer_cast<std::uint64_t>
+        return query<RegionAddress>(::getpid(), detail::address_cast<std::uint64_t>
                 (address));
     }
     template<class RegionAddress, class Address>
@@ -169,7 +169,7 @@ namespace vmu {
         maps.open("/proc/" + std::to_string(handle) + "/maps");
 
         return detail::query_impl<RegionAddress>(maps,
-                detail::pointer_cast<std::uint64_t>(address));
+                detail::address_cast<std::uint64_t>(address));
     }
     template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(native_handle_t handle
@@ -183,7 +183,7 @@ namespace vmu {
         }
 
         return detail::query_impl<RegionAddress>(maps,
-                detail::pointer_cast<std::uint64_t>(address));
+                detail::address_cast<std::uint64_t>(address));
     }
 
     template<class RegionAddress, class Address>
@@ -195,8 +195,8 @@ namespace vmu {
         maps.open("/proc/" + std::to_string(handle) + "/maps");
 
         return detail::query_range_impl<RegionAddress>(maps,
-                detail::pointer_cast<std::uint64_t>(begin),
-                detail::pointer_cast<std::uint64_t>(end));
+                detail::address_cast<std::uint64_t>(begin),
+                detail::address_cast<std::uint64_t>(end));
     }
     template<class RegionAddress, class Address>
     inline std::vector<basic_region<RegionAddress>>
@@ -209,8 +209,8 @@ namespace vmu {
         }
 
         return detail::query_range_impl<RegionAddress>(maps,
-                detail::pointer_cast<std::uint64_t>(begin),
-                detail::pointer_cast<std::uint64_t>(end));
+                detail::address_cast<std::uint64_t>(begin),
+                detail::address_cast<std::uint64_t>(end));
     }
 
 }

@@ -17,7 +17,7 @@
 #ifndef VMU_OSX_QUERY_INL
 #define VMU_OSX_QUERY_INL
 
-#include "../checked_pointers.hpp"
+#include "vmu/detail/address_cast.hpp"
 #include "../../query.hpp"
 #include <mach/mach.h>
 
@@ -61,15 +61,15 @@ namespace vmu { namespace detail {
                                     , "mach_vm_region() failed");
 
         if (region_base > address)
-            return {detail::pointer_cast<RegionAddress>(region_base)
-                    , detail::pointer_cast<RegionAddress>(region_size)
+            return {detail::address_cast<RegionAddress>(region_base)
+                    , detail::address_cast<RegionAddress>(region_size)
                     , protection_t(0)
                     , false
                     , false
                     , false};
 
-        return {detail::pointer_cast<RegionAddress>(region_base)
-                , detail::pointer_cast<RegionAddress>(region_size)
+        return {detail::address_cast<RegionAddress>(region_base)
+                , detail::address_cast<RegionAddress>(region_size)
                 , info.protection
                 , is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD
@@ -99,15 +99,15 @@ namespace vmu { namespace detail {
             ec = std::error_code(kr, std::system_category());
 
         if (region_base > address)
-            return {detail::pointer_cast<RegionAddress>(region_base)
-                    , detail::pointer_cast<RegionAddress>(region_size)
+            return {detail::address_cast<RegionAddress>(region_base)
+                    , detail::address_cast<RegionAddress>(region_size)
                     , protection_t(0)
                     , false
                     , false
                     , false};
 
-        return {detail::pointer_cast<RegionAddress>(region_base)
-                , detail::pointer_cast<RegionAddress>(region_size)
+        return {detail::address_cast<RegionAddress>(region_base)
+                , detail::address_cast<RegionAddress>(region_size)
                 , info.protection
                 , detail::is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD

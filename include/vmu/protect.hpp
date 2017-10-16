@@ -38,8 +38,8 @@ namespace vmu {
     template<class Address>
     inline void protect(Address address, protection_t prot)
     {
-        auto fixed_address = detail::cast_to_uintptr(address);
-#ifdef _WIN32
+        auto fixed_address = detail::uintptr_cast(address);
+#ifndef _WIN32
         fixed_address &= -page_size();
 #endif
         protect(fixed_address, fixed_address + 1, prot);
@@ -48,8 +48,8 @@ namespace vmu {
     template<class Address>
     inline void protect(Address address, protection_t prot, std::error_code& ec)
     {
-        auto fixed_address = detail::cast_to_uintptr(address);
-#ifdef _WIN32
+        auto fixed_address = detail::uintptr_cast(address);
+#ifndef _WIN32
         fixed_address &= -page_size();
 #endif
         protect(fixed_address, fixed_address + 1, prot, ec);

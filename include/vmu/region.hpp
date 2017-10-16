@@ -18,7 +18,7 @@
 #define VMU_REGION_HPP
 
 #include "protection.hpp"
-#include "detail/checked_pointers.hpp"
+#include "vmu/detail/address_cast.hpp"
 
 namespace vmu {
 
@@ -58,9 +58,8 @@ namespace vmu {
 
         constexpr Ptr end() const noexcept
         {
-            return detail::pointer_cast_unchecked<Ptr>(detail::cast_to_uintptr(base_address)
-                                                       + detail::cast_to_uintptr(size)
-                                                       + 1); // 1 past the end
+            return detail::address_cast_unchecked<Ptr>(detail::uintptr_cast(base_address)
+                                                       + detail::uintptr_cast(size) + 1); // 1 past the end
         }
 
         constexpr explicit operator bool() const noexcept { return in_use; }

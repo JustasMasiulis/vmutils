@@ -19,7 +19,7 @@
 
 #include "error.hpp"
 #include "../../query.hpp"
-#include "../checked_pointers.hpp"
+#include "vmu/detail/address_cast.hpp"
 
 namespace vmu { namespace detail {
 
@@ -29,7 +29,7 @@ namespace vmu { namespace detail {
         if (info.State == mem_reserve)
             info.Protect = no_access;
 
-        return {detail::pointer_cast<RegionAddress>(info.BaseAddress)
+        return {detail::address_cast<RegionAddress>(info.BaseAddress)
                 , info.RegionSize
                 , info.Protect
                 , (info.Type & mem_private) == 0
@@ -79,7 +79,7 @@ namespace vmu { namespace detail {
     inline basic_region<RegionAddress> query_impl(void* handle, Address address)
     {
         auto info{QueryT::query(handle
-                                , detail::pointer_cast<typename QueryT::address_type>(
+                                , detail::address_cast<typename QueryT::address_type>(
                         address))};
 
         return parse_info<RegionAddress>(info);
@@ -88,10 +88,11 @@ namespace vmu { namespace detail {
     template<class RegionAddress, class QueryT, class Address>
     inline basic_region<RegionAddress> query_impl(void* handle
                                                   , Address addr
-                                                  , std::error_code& ec) noexcept(!checked_pointers)
+                                                  , std::error_code& ec)
+    noexcept(!detail::ptr_checked<typename QueryT::address_type, Address>::value)
     {
         auto info{QueryT::query(handle
-                                , detail::pointer_cast<typename QueryT::address_type>(addr)
+                                , detail::address_cast<typename QueryT::address_type>(addr)
                                 , ec)};
 
         return parse_info<RegionAddress>(info);

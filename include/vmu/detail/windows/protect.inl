@@ -19,7 +19,7 @@
 
 #include "error.hpp"
 #include "../../protect.hpp"
-#include "../checked_pointers.hpp"
+#include "vmu/detail/address_cast.hpp"
 
 namespace vmu {
 
@@ -41,10 +41,10 @@ namespace vmu {
             return;
 
         unsigned long old;
-        const auto    size = detail::pointer_cast<detail::ULONG_PTR_>(end)
-                             - detail::pointer_cast_unchecked<detail::ULONG_PTR_>(begin);
+        const auto    size = detail::address_cast<detail::ULONG_PTR_>(end)
+                             - detail::address_cast_unchecked<detail::ULONG_PTR_>(begin);
 
-        if (detail::VirtualProtect(detail::pointer_cast_unchecked<void*>(begin)
+        if (detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
                                    , size
                                    , prot.native()
                                    , &old) == 0)
@@ -60,10 +60,10 @@ namespace vmu {
             return;
 
         unsigned long old;
-        const auto    size = detail::pointer_cast<detail::ULONG_PTR_>(end)
-                             - detail::pointer_cast_unchecked<detail::ULONG_PTR_>(begin);
+        const auto    size = detail::address_cast<detail::ULONG_PTR_>(end)
+                             - detail::address_cast_unchecked<detail::ULONG_PTR_>(begin);
 
-        if (detail::VirtualProtect(detail::pointer_cast_unchecked<void*>(begin)
+        if (detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
                                    , size
                                    , prot.native()
                                    , &old) == 0)
