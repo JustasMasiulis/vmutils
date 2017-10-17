@@ -42,7 +42,7 @@ namespace vmu { namespace detail {
     inline basic_region<RegionAddress> query_impl(vm_map_t handle, Address address)
     {
         // The address is aligned to the enclosing region
-        ::mach_vm_address_t       region_base = address;
+        auto region_base = address_cast<::mach_vm_address_t>(address);
         ::mach_vm_size_t          region_size = 0;
         ::vm_region_extended_info info;
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
@@ -81,7 +81,7 @@ namespace vmu { namespace detail {
     query_impl(vm_map_t handle, Address address, std::error_code& ec)
     {
         // The address is aligned to the enclosing region
-        ::mach_vm_address_t       region_base = address;
+        auto region_base = address_cast<::mach_vm_address_t>(address);
         ::mach_vm_size_t          region_size = 0;
         ::vm_region_extended_info info;
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
