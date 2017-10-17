@@ -77,7 +77,7 @@ TEST_CASE("protection_guard")
     REQUIRE(result);
 
     // TODO using FlushInstructionCache might be a thing to do
-    try {
+    {
         const auto new_prot = vmu::access::read;
         CHECK_FALSE(new_prot == result.prot.to_flags());
 
@@ -86,12 +86,6 @@ TEST_CASE("protection_guard")
         auto new_flags = vmu::query(testing_arr);
         CHECK(new_flags);
         CHECK(new_flags.prot.to_flags() == new_prot);
-        pg.restore();
-    }
-    catch(std::system_error& e)
-    {
-        FAIL_CHECK(e.what() << e.code());
-        vmu::protect(testing_arr, result.prot.native());
     }
 
     auto result2 = vmu::query(testing_arr);

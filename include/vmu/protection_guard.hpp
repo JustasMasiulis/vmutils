@@ -46,9 +46,9 @@ namespace vmu {
         protection_guard(Address address, protection_t prot)
         {
             _old.reserve(1);
-            auto fixed_address = detail::uintptr_cast(address);
+            auto fixed_address = detail::uintptr_cast(address) & -page_size();
             auto old = query<std::uintptr_t>(address);
-            _old.push_back({old.begin(), old.end(), old.prot});
+            _old.push_back({fixed_address, fixed_address + 1, old.prot});
             protect(address, prot);
         }
 
