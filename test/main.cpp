@@ -1,5 +1,6 @@
 #include <catch_with_main.hpp>
 #include <vmu.hpp>
+#include <memory>
 
 TEST_CASE("query")
 {
