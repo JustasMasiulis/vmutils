@@ -60,7 +60,7 @@ namespace vmu { namespace detail {
             throw std::system_error(std::error_code(kr, std::system_category())
                                     , "mach_vm_region() failed");
 
-        if (region_base > address)
+        if (region_base > address_cast<::mach_vm_address_t>(address))
             return {detail::address_cast<RegionAddress>(region_base)
                     , detail::address_cast<RegionAddress>(region_size)
                     , protection_t(0)
@@ -68,7 +68,7 @@ namespace vmu { namespace detail {
                     , false
                     , false};
 
-        return {detail::address_cast<RegionAddress>(region_base)
+        return {detail::address_cast_unchecked<RegionAddress>(region_base)
                 , detail::address_cast<RegionAddress>(region_size)
                 , info.protection
                 , is_shared(info.share_mode)
@@ -98,7 +98,7 @@ namespace vmu { namespace detail {
         if (kr != KERN_SUCCESS)
             ec = std::error_code(kr, std::system_category());
 
-        if (region_base > address)
+        if (region_base > address_cast_unchecked<::mach_vm_address_t>(address))
             return {detail::address_cast<RegionAddress>(region_base)
                     , detail::address_cast<RegionAddress>(region_size)
                     , protection_t(0)
