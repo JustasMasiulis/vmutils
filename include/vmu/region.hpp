@@ -24,10 +24,10 @@ namespace vmu {
 
     /// \brief The class representing memory region
     /// \tparam Ptr The type representing pointer in address space
-    template<typename Ptr>
+    template<class Address>
     class basic_region {
-        Ptr          _begin{static_cast<Ptr>(0)};
-        Ptr          _end{static_cast<Ptr>(0)};
+        Address      _begin{static_cast<Address>(0)};
+        Address      _end{static_cast<Address>(0)};
         protection_t _protection{0};
         bool         _used{false};
         bool         _shared{false};
@@ -36,14 +36,15 @@ namespace vmu {
 #endif
 
     public:
-        constexpr Ptr begin() const noexcept { return _begin; }
+        using address_type = Address;
 
-        constexpr Ptr end() const noexcept { return _end; }
+        constexpr address_type begin() const noexcept { return _begin; }
 
-        constexpr Ptr size() const noexcept
+        constexpr address_type end() const noexcept { return _end; }
+
+        constexpr detail::as_uintptr_t<address_type> size() const noexcept
         {
-            return detail::address_cast_unchecked<Ptr>(
-                    detail::uintptr_cast(_end) - detail::uintptr_cast(_begin));
+            return detail::uintptr_cast(detail::uintptr_cast(_end) - detail::uintptr_cast(_begin));
         }
 
         constexpr protection_t protection() const noexcept { return _protection; }
