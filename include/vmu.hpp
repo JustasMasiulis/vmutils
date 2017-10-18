@@ -17,7 +17,10 @@
 #ifndef VMU_VMU_HPP
 #define VMU_VMU_HPP
 
-// TODO use is_checked inside pointer_checker instead of checked_pointers
+// TODO list
+// use is_checked inside pointer_checker instead of checked_pointers
+// proper docs
+// proper tests
 
 #include "vmu/query.hpp"
 #include "vmu/protection_guard.hpp"

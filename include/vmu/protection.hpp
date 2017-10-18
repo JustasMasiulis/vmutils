@@ -116,9 +116,7 @@ namespace vmu {
 }
 
 #ifdef _WIN32
-
     #include "detail/windows/protection.inl"
-
 #else
     #include "detail/posix/protection.inl"
 #endif

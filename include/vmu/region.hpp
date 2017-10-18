@@ -25,44 +25,41 @@ namespace vmu {
     /// \brief The class representing memory region
     /// \tparam Ptr The type representing pointer in address space
     template<typename Ptr>
-    struct basic_region {
-        constexpr basic_region() noexcept
-                : base_address(0)
-                , size(0)
-                , prot(0)
-                , shared(false)
-                , guarded(false)
-                , in_use(false) {}
+    class basic_region {
+        Ptr          _begin{static_cast<Ptr>(0)};
+        Ptr          _end{static_cast<Ptr>(0)};
+        protection_t _protection{0};
+        bool         _used{false};
+        bool         _shared{false};
+#ifndef __linux__
+        bool         _guarded{false};
+#endif
 
-        constexpr basic_region(Ptr base_
-                               , Ptr size_
-                               , protection_t protection
-                               , bool shared_
-                               , bool guarded_
-                               , bool in_use_) noexcept
-                : base_address(base_)
-                , size(size_)
-                , prot(protection)
-                , shared(shared_)
-                , guarded(guarded_)
-                , in_use(in_use_) {}
+    public:
+        constexpr Ptr begin() const noexcept { return _begin; }
 
-        Ptr          base_address;
-        Ptr          size;
-        protection_t prot{};
-        bool         shared;
-        bool         guarded;
-        bool         in_use;
+        constexpr Ptr end() const noexcept { return _end; }
 
-        constexpr Ptr begin() const noexcept { return base_address; }
-
-        constexpr Ptr end() const noexcept
+        constexpr Ptr size() const noexcept
         {
-            return detail::address_cast_unchecked<Ptr>(detail::uintptr_cast(base_address)
-                                                       + detail::uintptr_cast(size) + 1); // 1 past the end
+            return detail::address_cast_unchecked<Ptr>(
+                    detail::uintptr_cast(_end) - detail::uintptr_cast(_begin));
         }
 
-        constexpr explicit operator bool() const noexcept { return in_use; }
+        constexpr protection_t protection() const noexcept { return _protection; }
+
+        constexpr bool guarded() const noexcept
+        {
+#ifndef __linux__
+            return _guarded;
+#else
+            return false;
+#endif
+        }
+
+        constexpr bool shared() const noexcept { return _shared; };
+
+        constexpr explicit operator bool() const noexcept { return _used; }
     };
 
 

@@ -29,9 +29,9 @@ namespace vmu { namespace detail {
         if (info.State == mem_reserve)
             info.Protect = no_access;
 
-        return {detail::address_cast<RegionAddress>(info.BaseAddress)
-                , info.RegionSize
-                , info.Protect
+        return basic_region<RegionAddress>{detail::address_cast<RegionAddress>(info.BaseAddress)
+                , detail::address_cast<RegionAddress>(info.RegionSize)
+                , protection_t{info.Protect}
                 , (info.Type & mem_private) == 0
                 , (info.Protect & page_guard) != 0
                 , info.State != mem_free};
