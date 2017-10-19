@@ -5,20 +5,19 @@
 template<class Address, class Address2>
 void check_region(const vmu::basic_region<Address> region, Address2 addr)
 {
-    REQUIRE(region);
+    REQUIRE(static_cast<bool>(region));
     CHECK(region.protection().readable());
     CHECK(region.protection().writable());
     CHECK(region.size() != 0);
-    CHECK(region.begin() >= addr);
-    CHECK(region.end() <= addr);
+    CHECK(vmu::detail::uintptr_cast(region.begin()) >= vmu::detail::uintptr_cast(addr));
+    CHECK(vmu::detail::uintptr_cast(region.end()) <= vmu::detail::uintptr_cast(addr));
 }
 
 TEST_CASE("query")
 {
     int  i     = 5;
-    auto ptr_i = reinterpret_cast<std::uintptr_t>(&i);
-    auto ret   = vmu::query(ptr_i);
-    check_region(ret, ptr_i);
+    auto ret   = vmu::query(&i);
+    check_region(ret, &i);
 }
 
 TEST_CASE("query error code")
@@ -34,7 +33,7 @@ TEST_CASE("query_range")
 {
     int  i    = 5;
     auto ptr  = reinterpret_cast<std::uintptr_t>(&i);
-    const auto rets = vmu::query_range(&i, &i + 16);
+    const auto rets = vmu::query_range(ptr, ptr + 16);
 
     REQUIRE_FALSE(rets.empty());
     for(const auto& ret : rets)

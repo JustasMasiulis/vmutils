@@ -20,6 +20,14 @@
 #include "protection.hpp"
 #include "vmu/detail/address_cast.hpp"
 
+#ifdef __linux__
+    #define VMU_NOT_FOR_LINUX(expr)
+    #define VMU_COMMA_NOT_FOR_LINUX(expr)
+#else
+    #define VMU_NOT_FOR_LINUX(expr) expr
+    #define VMU_COMMA_NOT_FOR_LINUX(expr) , expr
+#endif
+
 namespace vmu {
 
     /// \brief The class representing memory region
@@ -31,12 +39,25 @@ namespace vmu {
         protection_t _protection{0};
         bool         _used{false};
         bool         _shared{false};
-#ifndef __linux__
-        bool         _guarded{false};
-#endif
+        VMU_NOT_FOR_LINUX(bool _guarded{false});
 
     public:
         using address_type = Address;
+
+        constexpr basic_region() noexcept = default;
+
+        constexpr basic_region(address_type begin
+                               , address_type end
+                               , protection_t protection
+                               , bool used
+                               , bool shared
+                               VMU_COMMA_NOT_FOR_LINUX(bool guarded)) noexcept
+        : _begin(begin)
+        , _end(end)
+        , _protection(protection)
+        , _used(used)
+        , _shared(shared)
+        VMU_COMMA_NOT_FOR_LINUX(_guarded(guarded)) {}
 
         constexpr address_type begin() const noexcept { return _begin; }
 
