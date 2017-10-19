@@ -48,7 +48,7 @@ namespace vmu {
             _old.reserve(1);
             auto fixed_address = detail::uintptr_cast(address) & -page_size();
             auto old = query<std::uintptr_t>(address);
-            _old.push_back({fixed_address, fixed_address + 1, old.prot});
+            _old.push_back({fixed_address, fixed_address + 1, old.protection()});
             protect(address, prot);
         }
 
