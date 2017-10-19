@@ -9,8 +9,8 @@ void check_region(const vmu::basic_region<Address> region, Address2 addr)
     CHECK(region.protection().readable());
     CHECK(region.protection().writable());
     CHECK(region.size() != 0);
-    CHECK(vmu::detail::uintptr_cast(region.begin()) >= vmu::detail::uintptr_cast(addr));
-    CHECK(vmu::detail::uintptr_cast(region.end()) <= vmu::detail::uintptr_cast(addr));
+    CHECK(vmu::detail::uintptr_cast(region.begin()) <= vmu::detail::uintptr_cast(addr));
+    CHECK(vmu::detail::uintptr_cast(region.end()) >= vmu::detail::uintptr_cast(addr));
 }
 
 TEST_CASE("query")

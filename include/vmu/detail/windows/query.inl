@@ -24,36 +24,34 @@
 namespace vmu { namespace detail {
 
     template<class RegionAddress, class InfoT>
-    inline basic_region<RegionAddress> parse_info(InfoT& info) noexcept
+    inline basic_region<RegionAddress> parse_info(const InfoT& info) noexcept
     {
-        if (info.State == mem_reserve)
-            info.Protect = no_access;
+        const auto end = uintptr_cast(info.BaseAddress) + uintptr_cast(info.RegionSize);
 
-        return basic_region<RegionAddress>{detail::address_cast<RegionAddress>(info.BaseAddress)
-                , detail::address_cast<RegionAddress>(info.RegionSize)
-                , protection_t{info.Protect}
+        return {address_cast<RegionAddress>(info.BaseAddress)
+                , address_cast<RegionAddress>(end)
+                , info.State == mem_reserve ? no_access : info.Protect
+                , info.State != mem_free
                 , (info.Type & mem_private) == 0
-                , (info.Protect & page_guard) != 0
-                , info.State != mem_free};
+                , (info.Protect & page_guard) != 0};
     }
 
     struct native_query {
         using address_type = const void*;
 
-        static vmu::detail::MEMORY_BASIC_INFORMATION
-        query(void* handle, address_type address)
+        static MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
         {
-            vmu::detail::MEMORY_BASIC_INFORMATION info;
-            if (vmu::detail::VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
+            MEMORY_BASIC_INFORMATION info;
+            if (VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
                 throw_last_error("VirtualQueryEx() failed");
 
             return info;
         }
-        static vmu::detail::MEMORY_BASIC_INFORMATION
+        static MEMORY_BASIC_INFORMATION
         query(void* handle, address_type address, std::error_code& ec) noexcept
         {
-            vmu::detail::MEMORY_BASIC_INFORMATION info;
-            if (vmu::detail::VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
+            MEMORY_BASIC_INFORMATION info;
+            if (VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
                 ec = get_last_error();
 
             return info;
@@ -63,39 +61,49 @@ namespace vmu { namespace detail {
     struct wow64_query {
         using address_type = std::uint64_t;
 
-        static vmu::detail::MEMORY_BASIC_INFORMATION
-        query(void* handle, address_type address)
+        static MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
         {
-            throw std::logic_error("not implemented");
+            if (address >= std::numeric_limits<std::uint32_t>::max())
+                throw std::logic_error("not implemented");
+
+            return native_query::query(handle
+                                       , address_cast_unchecked<const void*>(address));
         }
-        static vmu::detail::MEMORY_BASIC_INFORMATION
+        static MEMORY_BASIC_INFORMATION
         query(void* handle, address_type address, std::error_code& ec)
         {
-            throw std::logic_error("not implemented");
+            if (address >= std::numeric_limits<std::uint32_t>::max())
+                throw std::logic_error("not implemented");
+
+            return native_query::query(handle
+                                       , address_cast_unchecked<const void*>(address)
+                                       , ec);
         }
     };
+
+#ifdef _WIN64
+    using remote_query = native_query;
+#else
+    using remote_query = wow64_query;
+#endif
 
     template<class RegionAddress, class QueryT, class Address>
     inline basic_region<RegionAddress> query_impl(void* handle, Address address)
     {
-        auto info{QueryT::query(handle
-                                , detail::address_cast<typename QueryT::address_type>(
-                        address))};
-
-        return parse_info<RegionAddress>(info);
+        using addr_t = typename QueryT::address_type;
+        return parse_info<RegionAddress>(QueryT::query(handle
+                                                       , address_cast<addr_t>(address)));
     };
 
     template<class RegionAddress, class QueryT, class Address>
-    inline basic_region<RegionAddress> query_impl(void* handle
-                                                  , Address addr
-                                                  , std::error_code& ec)
+    inline basic_region<RegionAddress>
+    query_impl(void* handle, Address addr, std::error_code& ec)
     noexcept(!detail::ptr_checked<typename QueryT::address_type, Address>::value)
     {
-        auto info{QueryT::query(handle
-                                , detail::address_cast<typename QueryT::address_type>(addr)
-                                , ec)};
-
-        return parse_info<RegionAddress>(info);
+        using addr_t = typename QueryT::address_type;
+        return parse_info<RegionAddress>(QueryT::query(handle
+                                                       , address_cast<addr_t>(addr)
+                                                       , ec));
     };
 
 }}
@@ -105,39 +113,28 @@ namespace vmu {
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
-        return detail::query_impl<RegionAddress
-                                  , detail::native_query>(detail::GetCurrentProcess()
-                                                          , address);
+        return detail::query_impl<RegionAddress, detail::native_query>(
+                detail::GetCurrentProcess(), address);
     }
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
-        return detail::query_impl<RegionAddress
-                                  , detail::native_query>(detail::GetCurrentProcess()
-                                                          , address
-                                                          , ec);
+        return detail::query_impl<RegionAddress, detail::native_query>(
+                detail::GetCurrentProcess(), address, ec);
     }
 
     template<class RegionAddress = std::uint64_t, class Address>
     inline basic_region<RegionAddress> query(native_handle_t handle, Address address)
     {
-#ifdef _WIN64
-        return detail::query_impl<RegionAddress, detail::native_query>(handle, address);
-#else
-        return detail::query_impl<RegionAddress, detail::wow64_query>(handle, address);
-#endif
+        return detail::query_impl<RegionAddress, detail::remote_query>(handle, address);
     }
     template<class RegionAddress = std::uint64_t, class Address>
     inline basic_region<RegionAddress>
     query(native_handle_t handle, Address address, std::error_code& ec)
     {
-#ifdef _WIN64
-        return detail::query_impl<RegionAddress, detail::native_query>(handle
+        return detail::query_impl<RegionAddress, detail::remote_query>(handle
                                                                        , address
                                                                        , ec);
-#else
-        return detail::query_impl<RegionAddress, detail::wow64_query>(handle, address, ec);
-#endif
     }
 
 }
