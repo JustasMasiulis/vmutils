@@ -28,10 +28,13 @@ namespace vmu { namespace detail {
     {
         const auto end = uintptr_cast(info.BaseAddress) + uintptr_cast(info.RegionSize);
 
+        if(info.State == mem_free)
+            return {address_cast<RegionAddress>(info.BaseAddress)
+                    , address_cast<RegionAddress>(end)};
+
         return {address_cast<RegionAddress>(info.BaseAddress)
                 , address_cast<RegionAddress>(end)
                 , info.State == mem_reserve ? no_access : info.Protect
-                , info.State != mem_free
                 , (info.Type & mem_private) == 0
                 , (info.Protect & page_guard) != 0};
     }

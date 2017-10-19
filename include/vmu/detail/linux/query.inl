@@ -25,7 +25,7 @@
 
 namespace vmu { namespace detail {
 
-    inline vmu::protection_t transform_prot(char (&prot)[4]) noexcept
+    constexpr inline vmu::protection_t transform_prot(char (&prot)[4]) noexcept
     {
         return {(prot[0] != '-') | ((prot[1] != '-') * 2) | ((prot[2] != '-') * 4)};
     }
@@ -37,12 +37,8 @@ namespace vmu { namespace detail {
             if (regions[i].begin() != regions[i - 1].end()) {
                 regions.emplace(regions.begin() + i
                                 , regions[i - 1].end()
-                                , regions[i].begin() - regions[i - 1].end()
-                                , 0
-                                , false
-                                , false
-                                , false);
-                // increment i twice
+                                , regions[i].begin());
+                // increment i twice to skip the newly inserted region
                 ++i;
             }
     }
@@ -59,11 +55,7 @@ namespace vmu { namespace detail {
             // address is in free memory and the last end is the beginning of the region
             if (begin > address)
                 return {address_cast<RegionAddress>(end)
-                        , address_cast<RegionAddress>(begin - end)
-                        , 0
-                        , false
-                        , false
-                        , false};
+                        , address_cast<RegionAddress>(begin)};
 
             // ignore the dash between addresses
             maps.ignore();
@@ -77,20 +69,14 @@ namespace vmu { namespace detail {
             maps.read(prot, 4);
 
             return {address_cast<RegionAddress>(begin)
-                    , address_cast<RegionAddress>(end - begin)
+                    , address_cast<RegionAddress>(end)
                     , transform_prot(prot)
-                    , prot[3] != '-'
-                    , false
-                    , true};
+                    , prot[3] != '-'};
         }
 
         return {address_cast<RegionAddress>(end)
                 , detail::address_cast_unchecked<RegionAddress>(
-                        std::numeric_limits<as_uintptr_t<RegionAddress>>::max())
-                , 0
-                , false
-                , false
-                , false};
+                        std::numeric_limits<as_uintptr_t<RegionAddress>>::max())};
     }
 
     template<class RegionAddress>
@@ -119,11 +105,9 @@ namespace vmu { namespace detail {
             maps.read(prot, 4);
 
             regions.emplace_back(detail::address_cast<RegionAddress>(begin)
-                                 , detail::address_cast<RegionAddress>(end - begin)
+                                 , detail::address_cast<RegionAddress>(end)
                                  , transform_prot(prot)
-                                 , prot[3] != '-'
-                                 , false
-                                 , true);
+                                 , prot[3] != '-');
         }
 
         // we now have the regions, but still need to find if there are any gaps and

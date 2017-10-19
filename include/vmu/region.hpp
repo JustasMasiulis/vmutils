@@ -46,18 +46,21 @@ namespace vmu {
 
         constexpr basic_region() noexcept = default;
 
+        constexpr basic_region(address_type begin, address_type end) noexcept
+                : _begin(begin)
+                , _end(end) {}
+
         constexpr basic_region(address_type begin
                                , address_type end
                                , protection_t protection
-                               , bool used
                                , bool shared
                                VMU_COMMA_NOT_FOR_LINUX(bool guarded)) noexcept
-        : _begin(begin)
-        , _end(end)
-        , _protection(protection)
-        , _used(used)
-        , _shared(shared)
-        VMU_COMMA_NOT_FOR_LINUX(_guarded(guarded)) {}
+                : _begin(begin)
+                , _end(end)
+                , _protection(protection)
+                , _used(true)
+                , _shared(shared)
+                VMU_COMMA_NOT_FOR_LINUX(_guarded(guarded)) {}
 
         constexpr address_type begin() const noexcept { return _begin; }
 
