@@ -24,7 +24,6 @@ namespace vmu {
 
     inline std::size_t page_size() noexcept;
 
-
     template<class Address>
     inline void protect(Address begin, Address end, protection_t prot);
 

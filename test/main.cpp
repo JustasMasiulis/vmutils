@@ -55,8 +55,8 @@ TEST_CASE("query_range error code")
 
 TEST_CASE("protection_guard")
 {
-    auto random_data = std::make_unique<volatile unsigned char[]>(4096 * 3);
-    volatile auto testing_arr = random_data.get();
+    auto random_data = std::make_unique<unsigned char[]>(4096 * 3);
+    auto testing_arr = random_data.get();
     // needed on linux
     memset((void*)testing_arr, 12, 4096 * 3);
     auto result = vmu::query(testing_arr);

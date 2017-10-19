@@ -18,6 +18,7 @@
 #define VMU_UINTPTR_CAST_HPP
 
 #include <cstdint>
+#include <type_traits>
 
 namespace vmu { namespace detail {
 
@@ -33,16 +34,26 @@ namespace vmu { namespace detail {
         using type = std::uint64_t;
     };
 
+    template<class T1, class T2, bool BothIntegral>
+    struct _select_address_cast {
+        static T1 perform(T2 val) noexcept { return reinterpret_cast<T1>(val); }
+    };
+
+    template<class T1, class T2>
+    struct _select_address_cast<T1, T2, true> {
+        static T1 perform(T2 val) noexcept { return static_cast<T1>(val); }
+    };
+
+    
     template<class T>
     using as_uintptr_t = typename _select_uintptr_t<sizeof(T)>::type;
 
-    template<class TargetAddress, class OriginalAddress>
-    inline constexpr TargetAddress address_cast_unchecked(OriginalAddress addr) noexcept
+    template<class A1, class A2>
+    inline constexpr A1 address_cast_unchecked(A2 addr) noexcept
     {
-        static_assert(alignof(as_uintptr_t<TargetAddress>) <= alignof(OriginalAddress)
-                      , "alignment requirements violation");
-
-        return *static_cast<TargetAddress*>(static_cast<void*>(&addr));
+        using cast_t = _select_address_cast<A1, A2, std::is_integral<A1>::value
+                                                    && std::is_integral<A2>::value>;
+        return cast_t::perform(addr);
     };
 
     template<class Address>
