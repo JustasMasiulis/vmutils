@@ -64,7 +64,6 @@ TEST_CASE("protection_guard")
 {
     auto random_data = std::make_unique<unsigned char[]>(4096 * 3);
     auto testing_arr = random_data.get();
-    // needed on linux
     memset((void*)testing_arr, 12, 4096 * 3);
     auto result = vmu::query(testing_arr);
     REQUIRE(result);

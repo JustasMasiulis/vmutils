@@ -17,7 +17,6 @@
 #ifndef VMU_POSIX_PROTECT_MEMORY_INL
 #define VMU_POSIX_PROTECT_MEMORY_INL
 
-#include "error.hpp"
 #include "../../protect.hpp"
 #include "vmu/detail/address_cast.hpp"
 #include <unistd.h>

@@ -68,7 +68,6 @@ namespace vmu {
     #include "detail/query_range_using_query.inl"
 #elif defined(__APPLE__)
     #include "detail/osx/query.inl"
-// TODO on apple I can probably query ranges more efficiently
     #include "detail/query_range_using_query.inl"
 #else
     #include "detail/linux/query.inl"

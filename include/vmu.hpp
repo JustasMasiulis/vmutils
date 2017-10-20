@@ -17,7 +17,7 @@
 #ifndef VMU_VMU_HPP
 #define VMU_VMU_HPP
 
-// TODO list
+// TODO
 // use is_checked inside pointer_checker instead of checked_pointers
 // proper docs
 // proper tests
