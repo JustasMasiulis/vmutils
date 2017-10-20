@@ -13,6 +13,13 @@ void check_region(const vmu::basic_region<Address> region, Address2 addr)
     CHECK(vmu::detail::uintptr_cast(region.end()) >= vmu::detail::uintptr_cast(addr));
 }
 
+TEST_CASE("address_cast sanity check")
+{
+    std::uintptr_t uintptr = 0xdeadbeef;
+    void* ptr = vmu::detail::address_cast<void*>(uintptr);
+    REQUIRE(memcmp(&uintptr, &ptr, sizeof(void*)) == 0);
+}
+
 TEST_CASE("query")
 {
     int  i     = 5;
