@@ -51,15 +51,15 @@ namespace vmu { namespace detail {
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
         ::mach_port_t             object_name = 0;
 
-        const auto kr = ::mach_vm_region(::mach_task_self()
-                                         , &region_base
-                                         , &region_size
-                                         , VM_REGION_EXTENDED_INFO
-                                         , reinterpret_cast<::vm_region_info_t>(&info)
-                                         , &info_size
-                                         , &object_name);
+        const auto kr = mach_vm_region(::mach_task_self()
+                                       , &region_base
+                                       , &region_size
+                                       , VM_REGION_EXTENDED_INFO
+                                       , reinterpret_cast<::vm_region_info_t>(&info)
+                                       , &info_size
+                                       , &object_name);
         if(kr != KERN_SUCCESS) {
-            Handler(kr, "mach_vm_region() failed");
+            handler(kr, "mach_vm_region() failed");
             return {};
         }
 
@@ -68,7 +68,7 @@ namespace vmu { namespace detail {
                     , address_cast<RegionAddress>(region_base)};
 
         return {detail::address_cast_unchecked<RegionAddress>(region_base)
-                , advance_ptr(address, region_size)
+                , advance_ptr(region_base, region_size)
                 , info.protection
                 , is_shared(info.share_mode)
                 , info.user_tag == VM_MEMORY_GUARD};
