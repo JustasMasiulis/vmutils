@@ -36,7 +36,12 @@ namespace vmu { namespace detail {
 
     template<class T1, class T2, bool BothIntegral>
     struct _select_address_cast {
-        static T1 perform(T2 val) noexcept { return reinterpret_cast<T1>(val); }
+        static T1 perform(T2 val) noexcept {
+            static_assert(sizeof(T1) >= sizeof(T2)
+                          , "attempt to cast pointers of insufficient sizes");
+
+            return reinterpret_cast<T1>(val);
+        }
     };
 
     template<class T1, class T2>
@@ -44,7 +49,7 @@ namespace vmu { namespace detail {
         static T1 perform(T2 val) noexcept { return static_cast<T1>(val); }
     };
 
-    
+
     template<class T>
     using as_uintptr_t = typename _select_uintptr_t<sizeof(T)>::type;
 
@@ -53,6 +58,7 @@ namespace vmu { namespace detail {
     {
         using cast_t = _select_address_cast<A1, A2, std::is_integral<A1>::value
                                                     && std::is_integral<A2>::value>;
+
         return cast_t::perform(addr);
     };
 
