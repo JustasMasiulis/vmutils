@@ -25,20 +25,17 @@ namespace vmu {
         using native_protection_t = int;
     #endif
 
-}
-
-namespace vmu {
 
     enum class access : native_protection_t {
-        none = 0, read = 1, write = 2, exec = 4
+        none  = 0,
+        read  = 1,
+        write = 2,
+        exec  = 4
     };
-
 
     constexpr inline native_protection_t to_native(access flags);
 
-
     constexpr inline access from_native(native_protection_t flags);
-
 
     class protection_t {
         native_protection_t _native;
@@ -60,9 +57,6 @@ namespace vmu {
 
         constexpr native_protection_t native() const noexcept { return _native; }
         constexpr access to_flags() const { return from_native(_native); }
-
-        constexpr operator const native_protection_t&() const noexcept { return _native; }
-        constexpr operator native_protection_t&() noexcept { return _native; }
     };
 
 
@@ -113,7 +107,7 @@ namespace vmu {
         return lhs;
     }
 
-}
+} // namespace vmu
 
 #ifdef _WIN32
     #include "detail/windows/protection.inl"
@@ -121,4 +115,4 @@ namespace vmu {
     #include "detail/posix/protection.inl"
 #endif
 
-#endif // !VMU_PROTECTION_HPP
+#endif // include guard

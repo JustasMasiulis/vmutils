@@ -45,22 +45,21 @@ namespace vmu {
         template<class Address>
         protection_guard(Address address, protection_t prot)
         {
+            const auto fixed_address = detail::uintptr_cast(address) & -page_size();
+            const auto old = query<std::uintptr_t>(address);
             _old.reserve(1);
-            auto fixed_address = detail::uintptr_cast(address) & -page_size();
-            auto old = query<std::uintptr_t>(address);
-            _old.push_back({fixed_address, fixed_address + 1, old.protection()});
+            _old.push_back({fixed_address, fixed_address + 1, old.protection().native()});
             protect(address, prot);
         }
 
         template<class Address>
         protection_guard(Address begin, Address end, protection_t prot)
         {
-            auto regions = query_range<std::uintptr_t>(begin, end);
+            const auto regions = query_range<std::uintptr_t>(begin, end);
             _old.reserve(regions.size());
-            for (auto& region : regions) {
+            for (auto& region : regions)
                 if (region)
-                    _old.push_back({region.begin(), region.end(), region.prot.native()});
-            }
+                    _old.push_back({region.begin(), region.end(), region.protection().native()});
 
             protect(begin, end, prot);
         }
