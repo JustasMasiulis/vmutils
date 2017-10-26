@@ -64,8 +64,8 @@ namespace vmu {
             protect(begin, end, prot);
         }
 
-        template<class Address>
-        protection_guard(const basic_region<Address>& r, protection_t prot)
+        template<class Range>
+        protection_guard(const Range& r, protection_t prot)
                 : protection_guard(r.begin(), r.end(), prot) {}
 
         template<class Address>
@@ -80,9 +80,9 @@ namespace vmu {
                               , restore_to);
         }
 
-        template<class Address>
-        protection_guard(const basic_region<Address>& r, protection_t prot, adopt_protection_t)
-                : protection_guard(r.begin, r.end, prot, adopt_protection_t{}) {}
+        template<class Range, class Address>
+        protection_guard(const Range& r, protection_t prot, adopt_protection_t)
+                : protection_guard(r.begin(), r.end(), prot, adopt_protection_t{}) {}
 
 
         /// \brief not copy constructible
@@ -98,7 +98,7 @@ namespace vmu {
                 _old.pop_back();
             }
         }
-        void restore(std::error_code& ec)
+        void restore(std::error_code& ec) noexcept
         {
             while (!_old.empty()) {
                 const auto& back = _old.back();
