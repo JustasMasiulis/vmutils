@@ -19,6 +19,7 @@
 
 #include "query.hpp"
 #include "protect.hpp"
+#include "address_concept.hpp"
 
 namespace vmu {
 
@@ -64,7 +65,7 @@ namespace vmu {
             protect(begin, end, prot);
         }
 
-        template<class Range>
+        template<class Range, class = typename std::enable_if<!is_address<Range>::value>::type>
         protection_guard(const Range& r, protection_t prot)
                 : protection_guard(r.begin(), r.end(), prot) {}
 
