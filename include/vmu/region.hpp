@@ -46,6 +46,7 @@ namespace vmu {
 
         constexpr basic_region() noexcept = default;
 
+        /// \brief Constructs a memory region that is not in use.
         constexpr basic_region(address_type begin, address_type end) noexcept
                 : _begin(begin)
                 , _end(end) {}
@@ -62,17 +63,25 @@ namespace vmu {
                 , _shared(shared)
                 VMU_COMMA_NOT_FOR_LINUX(_guarded(guarded)) {}
 
+        /// \brief Returns the base address of the region.
         constexpr address_type begin() const noexcept { return _begin; }
 
-        constexpr address_type end() const noexcept { return _end; }
+        /// \brief Returns one past the end of the region.
+        constexpr address_type end() const noexcept
+        {
+            return detail::address_cast_unchecked<Address>(detail::uintptr_cast(_end) + 1);
+        }
 
+        /// \brief Returns the size of the region.
         constexpr detail::as_uintptr_t<address_type> size() const noexcept
         {
             return detail::uintptr_cast(detail::uintptr_cast(_end) - detail::uintptr_cast(_begin));
         }
 
+        /// \brief Return the protection of the region.
         constexpr protection_t protection() const noexcept { return _protection; }
 
+        /// \brief Returns whether the memory region is guarded.
         constexpr bool guarded() const noexcept
         {
 #ifndef __linux__
@@ -82,8 +91,10 @@ namespace vmu {
 #endif
         }
 
+        /// \brief Returns whether the memory region is shared.
         constexpr bool shared() const noexcept { return _shared; };
 
+        /// \brief Returns whether the memory region is in use.
         constexpr explicit operator bool() const noexcept { return _used; }
     };
 

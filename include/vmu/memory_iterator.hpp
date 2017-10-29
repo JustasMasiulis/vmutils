@@ -24,14 +24,14 @@ namespace vmu {
 
     template<class RegionAddress>
     class memory_iterator {
-        memory_region<RegionAddress> _region;
+        basic_region<RegionAddress> _region;
 
     public:
-        typedef memory_region             value_type;
-        typedef value_type&               reference;
-        typedef value_type*               pointer;
-        typedef std::ptrdiff_t            difference_type;
-        typedef std::forward_iterator_tag iterator_category;
+        typedef basic_region<RegionAddress> value_type;
+        typedef value_type&                 reference;
+        typedef value_type*                 pointer;
+        typedef std::ptrdiff_t              difference_type;
+        typedef std::forward_iterator_tag   iterator_category;
 
         template<class Address>
         memory_iterator(Address address)
@@ -40,7 +40,7 @@ namespace vmu {
         }
 
         constexpr reference operator*() const noexcept { return _region; }
-        constexpr pointer operator->() const noexcept {return &region; }
+        constexpr pointer operator->() const noexcept {return &_region; }
 
         memory_iterator& operator++()
         {
@@ -64,7 +64,7 @@ namespace vmu {
         template<typename OtherAddress>
         constexpr bool operator!=(const memory_iterator<OtherAddress>& other) const noexcept
         {
-            return !(operator==(lhs));
+            return !(operator==(other));
         }
     };
 

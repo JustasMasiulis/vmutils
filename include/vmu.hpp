@@ -22,7 +22,7 @@
 // proper docs
 // proper tests
 
-#include "vmu/query.hpp"
 #include "vmu/protection_guard.hpp"
+#include "vmu/memory_iterator.hpp"
 
 #endif // include guard
