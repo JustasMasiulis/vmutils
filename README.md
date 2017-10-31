@@ -1,4 +1,4 @@
-# vmutils [![Build Status](https://travis-ci.com/JustasMasiulis/vmutils.svg?branch=master)](https://travis-ci.com/JustasMasiulis/vmutils)
+# vmutils [![Build Status](https://travis-ci.org/JustasMasiulis/vmutils.svg?branch=master)](https://travis-ci.org/JustasMasiulis/vmutils)
 
 WIP virtual memory utilities. Not production or general usage ready.
 
