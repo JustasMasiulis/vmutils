@@ -23,6 +23,7 @@
 
 namespace vmu {
 
+    /// \brief The native, operating system dependant handle
 #if defined(_WIN32)
     using native_handle_t = void*;
 #elif defined(__apple__)
@@ -31,32 +32,84 @@ namespace vmu {
     using native_handle_t = ::pid_t;
 #endif
 
+    /// \brief Performs a query over a memory page located at given address.
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of argument address.
+    /// \param address The address of page to be queried.
+    /// \throw Throws std::system_error on failure or std::overflow_error if
+    ///        address overflows.
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address);
 
+    /// \brief Performs a query over a memory page located at given address.
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of argument address.
+    /// \param address The address of page to be queried.
+    /// \throw Does not throw if the address does not overflow.
     template<class RegionAddress = std::uintptr_t, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
 
+    /// \brief Performs a query over memory pages in range [begin; end)
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of arguments begin and end.
+    /// \param begin The beginning of range of pages to query.
+    /// \param end One pas the end of pages to query.
+    /// \throw Throws std::system_error on failure or std::overflow_error if
+    ///        begin or end addresses overflow.
     template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end);
 
+    /// \brief Performs a query over memory pages in range [begin; end)
+    /// \tparam RegionAddress The type to use for region.
+    /// \tparam Address The type of arguments begin and end.
+    /// \param begin The beginning of range of pages to query.
+    /// \param end One pas the end of pages to query.
+    /// \throw Does not throw if the address does not overflow.
     template<class RegionAddress = std::uintptr_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(Address begin, Address end, std::error_code& ec);
 
 
+    /// \brief Performs a query over a memory page located at given address.
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of argument address.
+    /// \param handle Handle to the target process.
+    /// \param address The address of page to be queried.
+    /// \throw Throws std::system_error on failure or std::overflow_error if
+    ///        address overflows.
     template<class RegionAddress = std::uint64_t, class Address>
     inline basic_region<RegionAddress> query(native_handle_t handle, Address address);
 
+    /// \brief Performs a query over a memory page located at given address.
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of argument address.
+    /// \param handle Handle to the target process.
+    /// \param address The address of page to be queried.
+    /// \throw Does not throw if the address does not overflow.
     template<class RegionAddress = std::uint64_t, class Address>
     inline basic_region<RegionAddress>
     query(native_handle_t handle, Address address, std::error_code& ec);
 
+    /// \brief Performs a query over memory pages in range [begin; end)
+    /// \tparam RegionAddress The type to use for address in basic_region.
+    /// \tparam Address The type of arguments begin and end.
+    /// \param handle Handle to the target process.
+    /// \param begin The beginning of range of pages to query.
+    /// \param end One pas the end of pages to query.
+    /// \throw Throws std::system_error on failure or std::overflow_error if
+    ///        begin or end addresses overflow.
     template<class RegionAddress = std::uint64_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(native_handle_t handle, Address begin, Address end);
 
+    /// \brief Performs a query over memory pages in range [begin; end)
+    /// \tparam RegionAddress The type to use for region.
+    /// \tparam Address The type of arguments begin and end.
+    /// \param handle Handle to the target process.
+    /// \param begin The beginning of range of pages to query.
+    /// \param end One pas the end of pages to query.
+    /// \throw Does not throw if the address does not overflow.
     template<class RegionAddress = std::uint64_t, class Address>
     inline std::vector<basic_region<RegionAddress>>
     query_range(native_handle_t handle, Address begin, Address end, std::error_code& ec);
