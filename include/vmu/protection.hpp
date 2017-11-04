@@ -37,6 +37,7 @@ namespace vmu {
 
     constexpr inline access from_native(native_protection_t flags);
 
+    /// /brief A basic wrapper class around memory protection constants.
     class protection_t {
         native_protection_t _native;
 

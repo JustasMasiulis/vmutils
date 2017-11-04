@@ -25,6 +25,7 @@ namespace vmu {
 
     struct adopt_protection_t { explicit adopt_protection_t() = default; };
 
+    /// \brief Provides a RAII based page protection
     class protection_guard {
         struct old_prot_storage {
             std::uintptr_t      begin;

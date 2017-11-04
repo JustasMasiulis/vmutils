@@ -22,7 +22,7 @@
 
 namespace vmu {
 
-    // An address is a pointer of any type or a 32 bit or 64 bit unsigned integer
+    /// \brief An address is a pointer of any type or a 32 bit or 64 bit unsigned integer
     template<class T>
     struct is_address {
         constexpr static bool value = std::is_pointer<T>::value

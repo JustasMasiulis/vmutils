@@ -22,18 +22,33 @@
 
 namespace vmu {
 
+    /// \brief Returns the operating systems page size.
+    /// \throws Does not throw
     inline std::size_t page_size() noexcept;
 
+    /// \brief Changes protection of pages in the range [begin; end)
+    /// \param begin The beginning of range to protect.
+    /// \param end One past the end of range to protect.
+    /// \param prot The protection to apply to the range.
+    /// \throws May throw system_error or overflow_error if address overflows.
     template<class Address>
     inline void protect(Address begin, Address end, protection_t prot);
 
+    /// \brief Changes protection of pages in the range [begin; end)
+    /// \param begin The beginning of range to protect.
+    /// \param end One past the end of range to protect.
+    /// \param prot The protection to apply to the range.
+    /// \throws May throw overflow_error if address overflows.
     template<class Address>
     inline void protect(Address begin
                         , Address end
                         , protection_t prot
                         , std::error_code& ec);
 
-
+    /// \brief Changes the protection of a page.
+    /// \param begin The address of the page to protect.
+    /// \param prot The protection to apply to the page.
+    /// \throws May throw system_error or overflow_error if address overflows.
     template<class Address>
     inline void protect(Address address, protection_t prot)
     {
@@ -44,6 +59,10 @@ namespace vmu {
         protect(fixed_address, fixed_address + 1, prot);
     }
 
+    /// \brief Changes the protection of a page.
+    /// \param begin The address of the page to protect.
+    /// \param prot The protection to apply to the page.
+    /// \throws May throw overflow_error if address overflows.
     template<class Address>
     inline void protect(Address address, protection_t prot, std::error_code& ec)
     {
