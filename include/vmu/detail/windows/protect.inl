@@ -26,8 +26,8 @@ namespace vmu {
     inline std::size_t page_size() noexcept
     {
         const static auto ps = [] {
-            SYSTEM_INFO info;
-            GetSystemInfo(&info);
+            detail::SYSTEM_INFO_ info;
+            detail::GetSystemInfo(reinterpret_cast<::_SYSTEM_INFO*>(&info));
             return static_cast<std::size_t>(info.dwPageSize);
         }();
 

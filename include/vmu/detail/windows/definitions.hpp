@@ -1,6 +1,9 @@
 #ifndef VMU_WINDOWS_DEFINITIONS_HPP
 #define VMU_WINDOWS_DEFINITIONS_HPP
 
+extern "C" struct _SYSTEM_INFO;
+extern "C" struct _MEMORY_BASIC_INFORMATION;
+
 namespace vmu { namespace detail {
 
 #ifdef _WIN64
@@ -13,7 +16,7 @@ namespace vmu { namespace detail {
     typedef unsigned long ULONG_PTR_;
 #endif
 
-    struct MEMORY_BASIC_INFORMATION {
+    struct MEMORY_BASIC_INFORMATION_ {
         void* BaseAddress;
         void* AllocationBase;
         unsigned long AllocationProtect;
@@ -23,7 +26,7 @@ namespace vmu { namespace detail {
         unsigned long Type;
     };
 
-    struct SYSTEM_INFO {
+    struct SYSTEM_INFO_ {
         union {
             unsigned long dwOemId;
             struct {
@@ -42,23 +45,26 @@ namespace vmu { namespace detail {
         unsigned short wProcessorRevision;
     };
 
-    extern "C" __declspec(dllimport) unsigned long __stdcall GetLastError();
+	extern "C" {
 
-    extern "C" __declspec(dllimport) ULONG_PTR_ __stdcall
-    VirtualQueryEx(void* handle
-                   , const void* address
-                   , MEMORY_BASIC_INFORMATION* buffer
-                   , ULONG_PTR_ size_of_info);
+		__declspec(dllimport) unsigned long __stdcall GetLastError();
+
+		__declspec(dllimport) ULONG_PTR_ __stdcall VirtualQueryEx(void* handle
+				                                                , const void* address
+				                                                , ::_MEMORY_BASIC_INFORMATION* buffer
+				                                                , ULONG_PTR_ size_of_info);
 
 
-    extern "C" __declspec(dllimport) int __stdcall VirtualProtect(void* address
-                                                                  , ULONG_PTR_ size
-                                                                  , unsigned long new_protection
-                                                                  , unsigned long* old_protection);
+		__declspec(dllimport) int __stdcall VirtualProtect(void* address
+			                                             , ULONG_PTR_ size
+			                                             , unsigned long new_protection
+			                                             , unsigned long* old_protection);
 
-    extern "C" __declspec(dllimport) void __stdcall GetSystemInfo(SYSTEM_INFO* info);
-    
-    extern "C" __declspec(dllimport) void* __stdcall GetCurrentProcess();
+		__declspec(dllimport) void __stdcall GetSystemInfo(::_SYSTEM_INFO* lpSystemInfo);
+
+		__declspec(dllimport) void* __stdcall GetCurrentProcess();
+
+	}
 
     constexpr static unsigned long mem_commit  = 0x1000;
     constexpr static unsigned long mem_free    = 0x10000;
@@ -66,7 +72,6 @@ namespace vmu { namespace detail {
     constexpr static unsigned long mem_private = 0x20000;
     constexpr static unsigned long page_guard  = 0x100;
     constexpr static unsigned long no_access   = 0x01;
-    
 
 }} // namespace vmu::detail
 

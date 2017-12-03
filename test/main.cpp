@@ -1,6 +1,7 @@
-#include <catch_with_main.hpp>
 #include <vmu.hpp>
 #include <memory>
+
+#include <catch_with_main.hpp>
 
 template<class Address, class Address2>
 void check_region(const vmu::basic_region<Address> region, Address2 addr)

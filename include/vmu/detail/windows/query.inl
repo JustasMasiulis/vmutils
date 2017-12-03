@@ -42,19 +42,25 @@ namespace vmu { namespace detail {
     struct native_query {
         using address_type = const void*;
 
-        static MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
+        static MEMORY_BASIC_INFORMATION_ query(void* handle, address_type address)
         {
-            MEMORY_BASIC_INFORMATION info;
-            if (VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
+            MEMORY_BASIC_INFORMATION_ info;
+            if (detail::VirtualQueryEx(handle
+				, address
+				, reinterpret_cast<::_MEMORY_BASIC_INFORMATION*>(&info)
+				, sizeof(info)) == 0)
                 throw_last_error("VirtualQueryEx() failed");
 
             return info;
         }
-        static MEMORY_BASIC_INFORMATION
+        static MEMORY_BASIC_INFORMATION_
         query(void* handle, address_type address, std::error_code& ec) noexcept
         {
-            MEMORY_BASIC_INFORMATION info;
-            if (VirtualQueryEx(handle, address, &info, sizeof(info)) == 0)
+            MEMORY_BASIC_INFORMATION_ info;
+            if (detail::VirtualQueryEx(handle
+				, address
+				, reinterpret_cast<::_MEMORY_BASIC_INFORMATION*>(&info)
+				, sizeof(info)) == 0)
                 ec = get_last_error();
 
             return info;
@@ -64,7 +70,7 @@ namespace vmu { namespace detail {
     struct wow64_query {
         using address_type = std::uint64_t;
 
-        static MEMORY_BASIC_INFORMATION query(void* handle, address_type address)
+        static MEMORY_BASIC_INFORMATION_ query(void* handle, address_type address)
         {
             if (address >= std::numeric_limits<std::uint32_t>::max())
                 throw std::logic_error("not implemented");
@@ -72,7 +78,7 @@ namespace vmu { namespace detail {
             return native_query::query(handle
                                        , address_cast_unchecked<const void*>(address));
         }
-        static MEMORY_BASIC_INFORMATION
+        static MEMORY_BASIC_INFORMATION_
         query(void* handle, address_type address, std::error_code& ec)
         {
             if (address >= std::numeric_limits<std::uint32_t>::max())
@@ -113,25 +119,25 @@ namespace vmu { namespace detail {
 
 namespace vmu {
 
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(Address address)
     {
         return detail::query_impl<RegionAddress, detail::native_query>(
                 detail::GetCurrentProcess(), address);
     }
-    template<class RegionAddress = std::uintptr_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(Address address, std::error_code& ec)
     {
         return detail::query_impl<RegionAddress, detail::native_query>(
                 detail::GetCurrentProcess(), address, ec);
     }
 
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress> query(native_handle_t handle, Address address)
     {
         return detail::query_impl<RegionAddress, detail::remote_query>(handle, address);
     }
-    template<class RegionAddress = std::uint64_t, class Address>
+    template<class RegionAddress, class Address>
     inline basic_region<RegionAddress>
     query(native_handle_t handle, Address address, std::error_code& ec)
     {
