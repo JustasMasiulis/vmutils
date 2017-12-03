@@ -20,6 +20,7 @@
 #include "protection.hpp"
 #include "vmu/detail/address_cast.hpp"
 
+// a dirty macro to not have large #ifdef blocks
 #ifdef __linux__
     #define VMU_NOT_FOR_LINUX(expr)
     #define VMU_COMMA_NOT_FOR_LINUX(expr)
