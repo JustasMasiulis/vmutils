@@ -18,7 +18,9 @@
 #define VMU_VMU_HPP
 
 // TODO
-// use is_checked inside pointer_checker instead of checked_pointers
+// proper noexcept specifications according to pointer checking
+// allocator support for everything...
+// get rid of std::vector
 // proper docs
 // proper tests
 

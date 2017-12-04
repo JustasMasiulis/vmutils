@@ -21,56 +21,46 @@
 #include <stdexcept>
 #include <string>
 
-// windows was not included - need to define all the macros myself
-#ifndef _WINDOWS_
-
-// dont want to leak all these definitions so a namespace macro is needed
-#define VMU_PROT_MACRO_NAMESPACE detail::
-
-namespace vmu { namespace detail {
-
-	constexpr native_protection_t PAGE_NOACCESS          = 0x01;
-	constexpr native_protection_t PAGE_READONLY          = 0x02;
-	constexpr native_protection_t PAGE_READWRITE         = 0x04;
-	constexpr native_protection_t PAGE_WRITECOPY         = 0x08;
-	constexpr native_protection_t PAGE_EXECUTE           = 0x10;
-	constexpr native_protection_t PAGE_EXECUTE_READ      = 0x20;
-	constexpr native_protection_t PAGE_EXECUTE_READWRITE = 0x40;
-	constexpr native_protection_t PAGE_EXECUTE_WRITECOPY = 0x80;
-
-	constexpr native_protection_t PAGE_GUARD        = 0x100;
-	constexpr native_protection_t PAGE_NOCACHE      = 0x200;
-	constexpr native_protection_t PAGE_WRITECOMBINE = 0x400;
-
-}}
-
-#else
-
-#define VMU_PROT_MACRO_NAMESPACE
-
-#endif
-
 namespace vmu {
+
+	namespace detail {
+
+		enum page_protection : native_protection_t {
+			noaccess = 0x01,
+			readonly = 0x02,
+			readwrite = 0x04,
+			writecopy = 0x08,
+			execute = 0x10,
+			execute_read = 0x20,
+			execute_readwrite = 0x40,
+			execute_writecopy = 0x80,
+
+			guard = 0x100,
+			nocache = 0x200,
+			writecombine = 0x400,
+		};
+
+	}
 
     constexpr inline native_protection_t to_native(access flags)
     {
         switch (flags)
         {
         case access::none:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_NOACCESS;
+            return detail::noaccess;
         case access::read:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_READONLY;
+            return detail::readonly;
         case access::write: // no writeonly
-            return VMU_PROT_MACRO_NAMESPACE PAGE_READWRITE;
+            return detail::readwrite;
         case access::exec:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE;
+            return detail::execute;
         case access::read_write:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_READWRITE;
+            return detail::readwrite;
         case access::read | access::exec:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READ;
+            return detail::execute_read;
         case access::write_exec:
 		case access::read_write_exec:
-            return VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READWRITE;
+            return detail::execute_readwrite;
         default:
             throw std::logic_error("unknown protection access combination");
         }
@@ -78,21 +68,21 @@ namespace vmu {
 
     constexpr inline access from_native(native_protection_t flags)
     {
-        switch (flags & (~(VMU_PROT_MACRO_NAMESPACE PAGE_GUARD | VMU_PROT_MACRO_NAMESPACE PAGE_NOCACHE | VMU_PROT_MACRO_NAMESPACE PAGE_WRITECOMBINE)))
+        switch (flags & (~(detail::guard | detail::nocache | detail::writecombine)))
         {
-        case VMU_PROT_MACRO_NAMESPACE PAGE_NOACCESS:
+		case detail::noaccess:
             return access::none;
-        case VMU_PROT_MACRO_NAMESPACE PAGE_READONLY:
+		case detail::readonly:
             return access::read;
-        case VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE:
+		case detail::execute:
             return access::exec;
-        case VMU_PROT_MACRO_NAMESPACE PAGE_READWRITE:
-		case VMU_PROT_MACRO_NAMESPACE PAGE_WRITECOPY:
+		case detail::readwrite:
+		case detail::writecopy:
             return access::read_write;
-        case VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READ:
+		case detail::execute_read:
             return access::read_exec;
-        case VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READWRITE:
-		case VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_WRITECOPY:
+		case detail::execute_readwrite:
+		case detail::execute_writecopy:
             return access::read_write_exec;
         default:
             throw std::range_error("unknown protection constant: " + std::to_string(flags));
@@ -101,36 +91,36 @@ namespace vmu {
 
     constexpr bool protection_t::accessible() const noexcept
     {
-        return !(_native & VMU_PROT_MACRO_NAMESPACE PAGE_NOACCESS);
+        return !(_native & detail::noaccess);
     }
 
     constexpr bool protection_t::readable() const noexcept
     {
         return accessible()
-            && ((_native & VMU_PROT_MACRO_NAMESPACE PAGE_READWRITE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READ)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READWRITE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_READONLY)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_WRITECOPY)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_WRITECOPY));
+            && ((_native & detail::readwrite)
+                || (_native & detail::execute_read)
+                || (_native & detail::execute_readwrite)
+                || (_native & detail::readonly)
+                || (_native & detail::writecopy)
+                || (_native & detail::execute_writecopy));
     }
 
     constexpr bool protection_t::writable() const noexcept
     {
         return accessible()
-            && ((_native & VMU_PROT_MACRO_NAMESPACE PAGE_READWRITE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READWRITE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_WRITECOPY)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_WRITECOPY));
+            && ((_native & detail::readwrite)
+                || (_native & detail::execute_readwrite)
+                || (_native & detail::execute_writecopy)
+                || (_native & detail::writecopy));
     }
 
     constexpr bool protection_t::executable() const noexcept
     {
         return accessible()
-            && ((_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READ)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_READWRITE)
-                || (_native & VMU_PROT_MACRO_NAMESPACE PAGE_EXECUTE_WRITECOPY));
+            && ((_native & detail::execute_read)
+                || (_native & detail::execute)
+                || (_native & detail::execute_readwrite)
+                || (_native & detail::execute_writecopy));
     }
 
 } // namespace vmu

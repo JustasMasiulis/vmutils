@@ -49,6 +49,11 @@ namespace vmu { namespace detail {
         static T1 perform(T2 val) noexcept { return static_cast<T1>(val); }
     };
 
+	template<class T>
+	struct pointer_or_unsigned {
+		static constexpr bool value = std::is_pointer<T>::value || std::is_unsigned<T>::value;
+	};
+
 
     template<class T>
     using as_uintptr_t = typename _select_uintptr_t<sizeof(T)>::type;
@@ -56,6 +61,8 @@ namespace vmu { namespace detail {
     template<class A1, class A2>
     inline constexpr A1 address_cast_unchecked(A2 addr) noexcept
     {
+		static_assert(pointer_or_unsigned<A1>::value && pointer_or_unsigned<A2>::value,
+			"address cast can only be used on valid address types");
         using cast_t = _select_address_cast<A1, A2, std::is_integral<A1>::value
                                                     && std::is_integral<A2>::value>;
 
