@@ -59,7 +59,7 @@ namespace vmu {
         template<class Address>
         protection_guard(Address address, protection_t new_protection)
         {
-            const auto fixed_address = detail::uintptr_cast(address) & -page_size();
+            const auto fixed_address = detail::uintptr_cast(address) & ~(page_size() - 1);
             const auto old = query<std::uintptr_t>(address);
             _old.reserve(1);
             _old.push_back({fixed_address, fixed_address + 1, old.protection().native()});

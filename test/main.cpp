@@ -65,11 +65,10 @@ TEST_CASE("protection_guard")
 {
     auto random_data = std::make_unique<unsigned char[]>(4096 * 3);
     auto testing_arr = random_data.get();
-    memset((void*)testing_arr, 12, 4096 * 3);
+    memset(testing_arr, 12, 4096 * 3);
     auto result = vmu::query(testing_arr);
     REQUIRE(result);
 
-    // TODO using FlushInstructionCache might be a thing to do
     {
         const auto new_prot = vmu::access::read;
         CHECK_FALSE(new_prot == result.protection().to_flags());
@@ -86,4 +85,20 @@ TEST_CASE("protection_guard")
     REQUIRE(result2.begin() == result.begin());
     REQUIRE(result2.protection().to_flags() == result.protection().to_flags());
     REQUIRE(result2.guarded() == result.guarded());
+}
+
+TEST_CASE("query_iterator")
+{
+	const auto total_size = vmu::page_size() * 5;
+	auto random_data = std::make_unique<unsigned char[]>(total_size);
+	auto begin = random_data.get();
+	auto end = begin + total_size;
+
+	vmu::query_iterator end_it(end);
+	for (vmu::query_iterator it(begin); it != end_it; ++it) {
+		REQUIRE(static_cast<bool>(*it));
+		CHECK(it->protection().readable());
+		CHECK(it->protection().writable());
+		CHECK(it->size() != 0);
+	}
 }

@@ -25,6 +25,6 @@
 // proper tests
 
 #include "vmu/protection_guard.hpp"
-#include "vmu/memory_iterator.hpp"
+#include "vmu/query_iterator.hpp"
 
 #endif // include guard

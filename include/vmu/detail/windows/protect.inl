@@ -44,11 +44,16 @@ namespace vmu {
         const auto    size = detail::address_cast<detail::ULONG_PTR_>(end)
                              - detail::address_cast_unchecked<detail::ULONG_PTR_>(begin);
 
-        if (detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
+        if (!detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
                                    , size
                                    , prot.native()
-                                   , &old) == 0)
+                                   , &old))
             detail::throw_last_error("VirtualProtect() failed");
+
+		if (!detail::FlushInstructionCache(detail::GetCurrentProcess()
+			, detail::address_cast_unchecked<const void*>(begin)
+			, size))
+			detail::throw_last_error("FlushInstructionCache() failed");
     }
 
 
@@ -63,12 +68,18 @@ namespace vmu {
         const auto    size = detail::address_cast<detail::ULONG_PTR_>(end)
                              - detail::address_cast_unchecked<detail::ULONG_PTR_>(begin);
 
-        if (detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
-                                   , size
-                                   , prot.native()
-                                   , &old) == 0)
-            ec = detail::get_last_error();
+		if (detail::VirtualProtect(detail::address_cast_unchecked<void*>(begin)
+			, size
+			, prot.native()
+			, &old))
+			if (detail::FlushInstructionCache(detail::GetCurrentProcess()
+				, detail::address_cast_unchecked<const void*>(begin)
+				, size))
+				return;
+
+        ec = detail::get_last_error();
     }
+
 } // namespace vmu
 
 #endif // include guard

@@ -22,32 +22,36 @@
 
 namespace vmu {
 
-    template<class RegionAddress>
-    class memory_iterator {
+    template<class RegionAddress = std::uintptr_t>
+    class basic_query_iterator {
         basic_region<RegionAddress> _region;
 
     public:
         typedef basic_region<RegionAddress> value_type;
         typedef value_type&                 reference;
+		typedef const value_type&           const_reference;
         typedef value_type*                 pointer;
+		typedef const value_type*           const_pointer;
         typedef std::ptrdiff_t              difference_type;
         typedef std::forward_iterator_tag   iterator_category;
 
         template<class Address>
-        memory_iterator(Address address)
+		basic_query_iterator(Address address)
         {
             _region = query(address);
         }
 
-        constexpr reference operator*() const noexcept { return _region; }
-        constexpr pointer operator->() const noexcept {return &_region; }
+        constexpr reference operator*() noexcept { return _region; }
+		constexpr const_reference operator*() const noexcept { return _region; }
+        constexpr pointer operator->() noexcept { return &_region; }
+		constexpr const_pointer operator->() const noexcept { return &_region; }
 
-        memory_iterator& operator++()
+		basic_query_iterator& operator++()
         {
             _region = vmu::query(_region.end());
             return *this;
         }
-        memory_iterator operator++(int)
+		basic_query_iterator operator++(int)
         {
             auto temp = *this;
             _region = vmu::query(_region.end());
@@ -55,18 +59,20 @@ namespace vmu {
         }
 
         template<class OtherAddress>
-        constexpr bool operator==(const memory_iterator<OtherAddress>& other) const noexcept
+        constexpr bool operator==(const basic_query_iterator<OtherAddress>& other) const noexcept
         {
             return detail::uintptr_cast(other._region.begin())  >= detail::uintptr_cast(_region.begin())
                    && detail::uintptr_cast(other._region.end()) <= detail::uintptr_cast(_region.end());
         }
 
         template<typename OtherAddress>
-        constexpr bool operator!=(const memory_iterator<OtherAddress>& other) const noexcept
+        constexpr bool operator!=(const basic_query_iterator<OtherAddress>& other) const noexcept
         {
             return !(operator==(other));
         }
     };
+
+	using query_iterator = basic_query_iterator<>;
 
 };
 
