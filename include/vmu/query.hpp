@@ -20,17 +20,9 @@
 #include <vector>
 #include <system_error>
 #include "region.hpp"
+#include "detail/native_handle.hpp"
 
 namespace vmu {
-
-    /// \brief The native, operating system dependant handle
-#if defined(_WIN32)
-    using native_handle_t = void*;
-#elif defined(__apple__)
-    using native_handle_t = ::mach_port_t;
-#else
-    using native_handle_t = ::pid_t;
-#endif
 
     /// \brief Performs a query over a memory page located at given address.
     /// \tparam RegionAddress The type to use for address in basic_region.
