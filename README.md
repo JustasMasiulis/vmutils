@@ -4,11 +4,10 @@ cross platform virtual memory utilities library.
 
 ## small example
 ```cpp
-// also possible to query a range using vmu::query_range(begin, end)
+// address can be unsinged integer or pointer
 const auto region = vmu::query(address);
 if(region && region.protection().accessible()) {
-    // vmu::access::read_write_exec is also valid
-    const auto new_flags = vmu::access::read | vmu::acess::write | vmu::access::execute;
+    const auto new_flags = vmu::access::read_write_exec;
     vmu::protection_guard(address, new_flags);
     // do something
 } // protection will be restored on scope exit
