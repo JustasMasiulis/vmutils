@@ -35,25 +35,6 @@ namespace vmu { namespace detail {
         using type = std::uint64_t;
     };
 
-    template<class T1, class T2, bool SizeMatches>
-    struct _select_address_cast {
-        static T1 perform(T2 val) noexcept 
-        {
-            T1 value;
-            std::memcpy(&value, &val, sizeof(T1));
-
-            return value;
-        }
-    };
-
-    template<class T1, class T2>
-    struct _select_address_cast<T1, T2, true> { // sizeof(T1) == sizeof(T2)
-        constexpr static T1 perform(T2 val) noexcept 
-        {
-            return *static_cast<T1*>(static_cast<void*>(&val));
-        }
-    };
-
     template<class T>
     struct is_pointer_or_unsigned {
         static constexpr bool value = std::is_pointer<T>::value || std::is_unsigned<T>::value;
@@ -67,9 +48,12 @@ namespace vmu { namespace detail {
     {
         static_assert(is_pointer_or_unsigned<A1>::value && is_pointer_or_unsigned<A2>::value,
             "address cast can only be used on valid address types");
-        using cast_t = _select_address_cast<A1, A2, sizeof(A1) == sizeof(A2)>;
 
-        return cast_t::perform(addr);
+        // clang, gcc and msvc all optimize the memcpy away
+        A1 value{ 0 };
+        std::memcpy(&value, &addr, sizeof(A2));
+
+        return value;
     };
 
     template<class Address>

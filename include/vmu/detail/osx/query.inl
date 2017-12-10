@@ -17,10 +17,8 @@
 #ifndef VMU_OSX_QUERY_INL
 #define VMU_OSX_QUERY_INL
 
-#include "vmu/detail/address_cast.hpp"
 #include "../../query.hpp"
 #include "../error_handlers.hpp"
-#include <mach/mach_types.h>
 #include <mach/mach_traps.h>
 #include <mach/vm_region.h>
 #include <mach/mach_init.h>
@@ -54,7 +52,7 @@ namespace vmu { namespace detail {
         ::mach_msg_type_number_t  info_size   = sizeof(::vm_region_extended_info);
         ::mach_port_t             object_name = 0;
 
-        const auto kr = mach_vm_region(::mach_task_self()
+        const auto kr = mach_vm_region(handle
                                        , &region_base
                                        , &region_size
                                        , VM_REGION_EXTENDED_INFO
