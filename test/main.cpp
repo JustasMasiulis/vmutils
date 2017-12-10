@@ -61,7 +61,7 @@ TEST_CASE("query_range error code")
         check_region(ret, ptr);
 }
 
-TEST_CASE("protection_guard")
+TEST_CASE("protection_guard(Address, protection_t)")
 {
     auto random_data = std::make_unique<unsigned char[]>(4096 * 3);
     auto testing_arr = random_data.get();
@@ -85,6 +85,32 @@ TEST_CASE("protection_guard")
     REQUIRE(result2.begin() == result.begin());
     REQUIRE(result2.protection().to_flags() == result.protection().to_flags());
     REQUIRE(result2.guarded() == result.guarded());
+}
+
+TEST_CASE("protection_guard(Address, Address, protection_t)")
+{
+    auto random_data = std::make_unique<unsigned char[]>(4096 * 3);
+    auto testing_arr = random_data.get();
+    memset(testing_arr, 12, 4096 * 3);
+    auto result = vmu::query(testing_arr);
+    REQUIRE(result);
+
+    {
+        const auto new_prot = vmu::access::read;
+        CHECK_FALSE(new_prot == result.protection().to_flags());
+
+        vmu::protection_guard pg(testing_arr, testing_arr + 4096 * 3, new_prot);
+
+        auto new_flags = vmu::query(testing_arr);
+        CHECK(new_flags);
+        CHECK(new_flags.protection().to_flags() == new_prot);
+    }
+
+    auto result2 = vmu::query(testing_arr);
+    REQUIRE(result2.shared()                == result.shared());
+    REQUIRE(result2.begin()                 == result.begin());
+    REQUIRE(result2.protection().to_flags() == result.protection().to_flags());
+    REQUIRE(result2.guarded()               == result.guarded());
 }
 
 TEST_CASE("query_iterator")
