@@ -22,7 +22,7 @@
 #include "../error_handlers.hpp"
 #include <mach/mach_types.h>
 #include <mach/mach_traps.h>
-#include <mach/vm_info.h>
+#include <mach/vm_region.h>
 
 namespace vmu { namespace detail {
 
