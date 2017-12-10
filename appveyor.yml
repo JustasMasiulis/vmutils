@@ -30,9 +30,9 @@ before_build:
 
 # build with MSBuild
 build:
-  project: Build\vmutils.sln            # path to Visual Studio solution or project
-  parallel: true                        # enable MSBuild parallel builds
-  verbosity: normal                     # MSBuild verbosity level {quiet|minimal|normal|detailed}
+  project: Build\vmu.sln  # path to Visual Studio solution or project
+  parallel: true          # enable MSBuild parallel builds
+  verbosity: normal       # MSBuild verbosity level {quiet|minimal|normal|detailed}
 
 test_script:
   - cd Build
