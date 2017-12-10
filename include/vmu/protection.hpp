@@ -31,10 +31,10 @@ namespace vmu {
         read  = 1,
         write = 2,
         exec  = 4,
-		read_write = read  | write,
-		read_exec  = read  | exec,
-		write_exec = write | exec,
-		read_write_exec = read | write | exec
+        read_write = read  | write,
+        read_exec  = read  | exec,
+        write_exec = write | exec,
+        read_write_exec = read | write | exec
     };
 
     constexpr inline native_protection_t to_native(access flags);

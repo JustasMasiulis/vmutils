@@ -89,16 +89,16 @@ TEST_CASE("protection_guard")
 
 TEST_CASE("query_iterator")
 {
-	const auto total_size = vmu::page_size() * 5;
-	auto random_data = std::make_unique<unsigned char[]>(total_size);
-	auto begin = random_data.get();
-	auto end = begin + total_size;
+    const auto total_size = vmu::page_size() * 5;
+    auto random_data = std::make_unique<unsigned char[]>(total_size);
+    auto begin = random_data.get();
+    auto end = begin + total_size;
 
-	vmu::query_iterator end_it(end);
-	for (vmu::query_iterator it(begin); it != end_it; ++it) {
-		REQUIRE(static_cast<bool>(*it));
-		CHECK(it->protection().readable());
-		CHECK(it->protection().writable());
-		CHECK(it->size() != 0);
-	}
+    vmu::query_iterator end_it(end);
+    for (vmu::query_iterator it(begin); it != end_it; ++it) {
+        REQUIRE(static_cast<bool>(*it));
+        CHECK(it->protection().readable());
+        CHECK(it->protection().writable());
+        CHECK(it->size() != 0);
+    }
 }

@@ -20,7 +20,9 @@
 #include "vmu/detail/address_cast.hpp"
 #include "../../query.hpp"
 #include "../error_handlers.hpp"
-#include <mach/mach.h>
+#include <mach/mach_types.h>
+#include <mach/mach_traps.h>
+#include <mach/vm_info.h>
 
 namespace vmu { namespace detail {
 

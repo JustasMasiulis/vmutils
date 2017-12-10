@@ -29,29 +29,29 @@ namespace vmu {
     public:
         typedef basic_region<RegionAddress> value_type;
         typedef value_type&                 reference;
-		typedef const value_type&           const_reference;
+        typedef const value_type&           const_reference;
         typedef value_type*                 pointer;
-		typedef const value_type*           const_pointer;
+        typedef const value_type*           const_pointer;
         typedef std::ptrdiff_t              difference_type;
         typedef std::forward_iterator_tag   iterator_category;
 
         template<class Address>
-		basic_query_iterator(Address address)
+        basic_query_iterator(Address address)
         {
             _region = query(address);
         }
 
         constexpr reference operator*() noexcept { return _region; }
-		constexpr const_reference operator*() const noexcept { return _region; }
+        constexpr const_reference operator*() const noexcept { return _region; }
         constexpr pointer operator->() noexcept { return &_region; }
-		constexpr const_pointer operator->() const noexcept { return &_region; }
+        constexpr const_pointer operator->() const noexcept { return &_region; }
 
-		basic_query_iterator& operator++()
+        basic_query_iterator& operator++()
         {
             _region = vmu::query(_region.end());
             return *this;
         }
-		basic_query_iterator operator++(int)
+        basic_query_iterator operator++(int)
         {
             auto temp = *this;
             _region = vmu::query(_region.end());
@@ -72,7 +72,7 @@ namespace vmu {
         }
     };
 
-	using query_iterator = basic_query_iterator<>;
+    using query_iterator = basic_query_iterator<>;
 
 };
 

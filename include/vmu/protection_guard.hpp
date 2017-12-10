@@ -37,25 +37,26 @@ namespace vmu {
     public:
 
         /// \brief Restores the memory protection to its state before the protection_guard constructor was called.
-		/// \throws Does not throw.
-		/// \note May not actually restore memory protection back to its original state.
-		///       In critical code sections prefer to manually call restore member function.
-		///       This behaviour may be overriden by defining a VMU_HANDLE_PG_DESTRUCTOR_FAILURE macro.
+        /// \throws Does not throw.
+        /// \note May not actually restore memory protection back to its original state.
+        ///       In critical code sections prefer to manually call restore member function.
+        ///       This behaviour may be overriden by defining a VMU_HANDLE_PG_DESTRUCTOR_FAILURE macro.
         ~protection_guard()
         {
             std::error_code ec;
-			for (const auto& ele : _old) {
-				protect(ele.begin, ele.end, ele.prot, ec);
+            for (const auto& ele : _old) {
+                protect(ele.begin, ele.end, ele.prot, ec);
 #ifdef VMU_HANDLE_PG_DESTRUCTOR_FAILURE
-				if (ec)
-					VMU_HANDLE_PG_DESTRUCTOR_FAILURE(ec);
+                if (ec) {
+                    VMU_HANDLE_PG_DESTRUCTOR_FAILURE(ec);
+                }
 #endif
-			}
+            }
         }
 
-		/// \brief Changes protection of a single page to given protection.
-		/// \param address The address that is situated in page whose protection is to be changed.
-		/// \param new_protection The new protection to be applied to the page.
+        /// \brief Changes protection of a single page to given protection.
+        /// \param address The address that is situated in page whose protection is to be changed.
+        /// \param new_protection The new protection to be applied to the page.
         template<class Address>
         protection_guard(Address address, protection_t new_protection)
         {
@@ -66,10 +67,10 @@ namespace vmu {
             protect(address, new_protection);
         }
 
-		/// \brief Changes protection of pages between range [begin; end) to given protection.
-		/// \param begin The beginning of the memory range to apply new protection to.
-		/// \param end One pas the end of the memory range to apply new protection to.
-		/// \param new_protection The new protection to be applied to the pages.
+        /// \brief Changes protection of pages between range [begin; end) to given protection.
+        /// \param begin The beginning of the memory range to apply new protection to.
+        /// \param end One pas the end of the memory range to apply new protection to.
+        /// \param new_protection The new protection to be applied to the pages.
         template<class Address>
         protection_guard(Address begin, Address end, protection_t new_protection)
         {
@@ -82,27 +83,27 @@ namespace vmu {
             protect(begin, end, new_protection);
         }
 
-		/// \brief Changes protection of pages that the given range crosses to given protection.
-		/// \param range The memory range whose protection is to be changed.
-		/// \param new_protection The new protection to be applied to the pages.
+        /// \brief Changes protection of pages that the given range crosses to given protection.
+        /// \param range The memory range whose protection is to be changed.
+        /// \param new_protection The new protection to be applied to the pages.
         template<class Range, class = typename std::enable_if<!is_address<Range>::value>::type>
         protection_guard(const Range& range, protection_t new_protection)
                 : protection_guard(range.begin(), range.end(), new_protection) {}
 
-		/// \brief Changes protection of a single page to given protection when the protection_guard object is destructed.
-		/// \param range The memory range whose protection is to be changed.
-		/// \param new_protection The new protection to be applied to the pages.
-		template<class Address>
-		protection_guard(Address address, protection_t restore_to, adopt_protection_t)
-		{
-			const auto fixed_address = detail::uintptr_cast(address) & -page_size();
-			_old.reserve(1);
-			_old.push_back({ fixed_address, fixed_address + 1, restore_to });
-		}
+        /// \brief Changes protection of a single page to given protection when the protection_guard object is destructed.
+        /// \param range The memory range whose protection is to be changed.
+        /// \param new_protection The new protection to be applied to the pages.
+        template<class Address>
+        protection_guard(Address address, protection_t restore_to, adopt_protection_t)
+        {
+            const auto fixed_address = detail::uintptr_cast(address) & -page_size();
+            _old.reserve(1);
+            _old.push_back({ fixed_address, fixed_address + 1, restore_to });
+        }
 
-		/// \brief Changes the protection of pages in memory range [begin; end) upon destruction of protection_guard object
-		/// \param range The memory range whose protection is to be changed.
-		/// \param new_protection The new protection to be applied to the pages.
+        /// \brief Changes the protection of pages in memory range [begin; end) upon destruction of protection_guard object
+        /// \param range The memory range whose protection is to be changed.
+        /// \param new_protection The new protection to be applied to the pages.
         template<class Address>
         protection_guard(Address begin
                          , Address end
@@ -125,7 +126,7 @@ namespace vmu {
         /// \brief not copy assignable
         protection_guard& operator=(const protection_guard&) = delete;
 
-		/// \brief Restores the memory protection back to its previous state.
+        /// \brief Restores the memory protection back to its previous state.
         void restore()
         {
             while (!_old.empty()) {
@@ -146,13 +147,13 @@ namespace vmu {
             }
         }
 
-		/// \brief Releases protections to restore.
-		/// \throws Should not throw due to the fact that shrink_to_fit is called on empty vector.
-		void release()
-		{
-			_old.clear();
-			_old.shrink_to_fit();
-		}
+        /// \brief Releases protections to restore.
+        /// \throws Should not throw due to the fact that shrink_to_fit is called on empty vector.
+        void release()
+        {
+            _old.clear();
+            _old.shrink_to_fit();
+        }
     };
 
 }

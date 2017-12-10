@@ -79,7 +79,7 @@ namespace vmu {
             return detail::uintptr_cast(detail::uintptr_cast(_end) - detail::uintptr_cast(_begin));
         }
 
-        /// \brief Return the protection of the region.
+        /// \brief Returns the protection of the region.
         constexpr protection_t protection() const noexcept { return _protection; }
 
         /// \brief Returns whether the memory region is guarded.

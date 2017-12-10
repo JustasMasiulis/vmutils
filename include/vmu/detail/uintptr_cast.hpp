@@ -34,26 +34,29 @@ namespace vmu { namespace detail {
         using type = std::uint64_t;
     };
 
-    template<class T1, class T2, bool BothIntegral>
+    template<class T1, class T2, bool SizeMatches>
     struct _select_address_cast {
-        static T1 perform(T2 val) noexcept {
-            static_assert(sizeof(T1) >= sizeof(T2)
-                          , "attempt to cast pointers of insufficient sizes");
+        static T1 perform(T2 val) noexcept 
+        {
+            T1 value;
+            std::memcpy(&value, &val, sizeof(T1));
 
-            return reinterpret_cast<T1>(val);
+            return value;
         }
     };
 
     template<class T1, class T2>
-    struct _select_address_cast<T1, T2, true> {
-        static T1 perform(T2 val) noexcept { return static_cast<T1>(val); }
+    struct _select_address_cast<T1, T2, true> { // sizeof(T1) == sizeof(T2)
+        constexpr static T1 perform(T2 val) noexcept 
+        {
+            return *static_cast<T1*>(static_cast<void*>(&val));
+        }
     };
 
-	template<class T>
-	struct pointer_or_unsigned {
-		static constexpr bool value = std::is_pointer<T>::value || std::is_unsigned<T>::value;
-	};
-
+    template<class T>
+    struct is_pointer_or_unsigned {
+        static constexpr bool value = std::is_pointer<T>::value || std::is_unsigned<T>::value;
+    };
 
     template<class T>
     using as_uintptr_t = typename _select_uintptr_t<sizeof(T)>::type;
@@ -61,10 +64,9 @@ namespace vmu { namespace detail {
     template<class A1, class A2>
     inline constexpr A1 address_cast_unchecked(A2 addr) noexcept
     {
-		static_assert(pointer_or_unsigned<A1>::value && pointer_or_unsigned<A2>::value,
-			"address cast can only be used on valid address types");
-        using cast_t = _select_address_cast<A1, A2, std::is_integral<A1>::value
-                                                    && std::is_integral<A2>::value>;
+        static_assert(is_pointer_or_unsigned<A1>::value && is_pointer_or_unsigned<A2>::value,
+            "address cast can only be used on valid address types");
+        using cast_t = _select_address_cast<A1, A2, sizeof(A1) == sizeof(A2)>;
 
         return cast_t::perform(addr);
     };

@@ -39,7 +39,7 @@ namespace vmu {
     /// \param address The address of page to be queried.
     /// \throw Does not throw if the address does not overflow.
     template<class RegionAddress = std::uintptr_t, class Address>
-	inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
+    inline basic_region<RegionAddress> query(Address address, std::error_code& ec);
 
     /// \brief Performs a query over memory pages in range [begin; end)
     /// \tparam RegionAddress The type to use for address in basic_region.
