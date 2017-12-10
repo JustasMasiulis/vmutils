@@ -70,7 +70,7 @@ TEST_CASE("protection_guard")
     REQUIRE(result);
 
     {
-        const auto new_prot = vmu::access::read;
+        const auto new_prot = vmu::access::read_write_exec;
         CHECK_FALSE(new_prot == result.protection().to_flags());
 
         vmu::protection_guard pg(testing_arr, new_prot);
