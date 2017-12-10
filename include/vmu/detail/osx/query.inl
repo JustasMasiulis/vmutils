@@ -23,6 +23,7 @@
 #include <mach/mach_types.h>
 #include <mach/mach_traps.h>
 #include <mach/vm_region.h>
+#include <mach/mach_init.h>
 
 namespace vmu { namespace detail {
 
