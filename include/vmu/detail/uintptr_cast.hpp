@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <cstring>
 
 namespace vmu { namespace detail {
 
