@@ -17,18 +17,18 @@ if(region && region.protection().accessible()) {
 ***
 
 # quick reference
-## `basic_region<AddressType>`
+## `basic_region<Address>`
 Provides information about a memory region. Can be obtained using `query` or `query_region`.
 
-| function      | type                                 | returns                       |
-| ------------- |------------------------------------- | ----------------------------- |
-| begin         | AddressType                          | beginning of region           |
-| end           | AddressType                          | one pas the end of region     |
-| size          | uint big enough to store AddressType | size of region                |
-| protection    | protection_t                         | the protection of page        |
-| guarded       | bool                                 | whether the region is guarded |
-| shared        | bool                                 | whether the region is shared  |
-| operator bool | bool                                 | whether the region is used    |
+| function      | return type                      | explanation                   |
+| ------------- |--------------------------------- | ----------------------------- |
+| begin         | Address                          | beginning of region           |
+| end           | Address                          | one pas the end of region     |
+| size          | uint big enough to store Address | size of region                |
+| protection    | protection_t                     | the protection of page        |
+| guarded       | bool                             | whether the region is guarded |
+| shared        | bool                             | whether the region is shared  |
+| operator bool | bool                             | whether the region is used    |
 
 ## `protection_t`
 Wrapper class around protection flags.
@@ -53,12 +53,12 @@ Wrapper class around protection flags.
 
 ## region query functions
 Arguments in `[]` are not required - overloaded functions are present.
-### `basic_region<RegionAddressType> query([native_handle_t], AddressType, [std::error_code&])`
+### `basic_region<RegionAddress> query([native_handle_t], Address, [std::error_code&])`
 Returns information about a region that the given address is in.
-### `std::vector<basic_region<RegionAddressType>> query_range([native_handle_t], AddressType, AddressType, [std::error_code&])`
+### `std::vector<basic_region<RegionAddress>> query_range([native_handle_t], Address, Address, [std::error_code&])`
 Returns information about regions that the given range of addresses are in.
 
-The default for RegionAddressType is `std::uintptr_t` or if the first function argument is of type
+The default for RegionAddress is `std::uintptr_t` or if the first function argument is of type
 `native_handle_t` - `std::uint64_t`.
 
 ## region protection
@@ -84,3 +84,16 @@ constructor overloads:
 | -------------               | ----------------------------------------------------------------------- |
 | restore([std::error_code&]) | restores protection to its original state                               |
 | release                     | "releases" protection so it does not get restored on object destruction |
+
+### `void protect(Address, protection_t, [std::error_code&])`
+Changes protection of a single page that the address is in.
+### `void protect(Address, Address, protection_t, [std::error_code&])`
+Changes protections of pages that range of addresses are in.
+
+## Address types
+In library addresses are 32bit or 64bit unsigned integers or pointers. Conversions are applied
+automatically. By default every address that can cause an overflow / underflow is checked and an
+std::overflow_error is thrown if the target address type cannot represent the source address type.
+
+An example of this would be if you called `vmu::query<std::uint32_t>(std::numeric_limits<std::uint32_t>::max() * 2)`
+it's pretty obvious that this regions end will definetly overflow the requested 32 bit integer.
