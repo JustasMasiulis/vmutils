@@ -1,4 +1,4 @@
-# vmutils [![Build Status](https://travis-ci.org/JustasMasiulis/vmutils.svg?branch=master)](https://travis-ci.org/JustasMasiulis/vmutils)
+# vmutils [![Build Status](https://travis-ci.org/JustasMasiulis/vmutils.svg?branch=master)](https://travis-ci.org/JustasMasiulis/vmutils) [![Build status](https://ci.appveyor.com/api/projects/status/kty003rauanbu8xh?svg=true)](https://ci.appveyor.com/project/JustasMasiulis/vmutils)
 
 cross platform virtual memory utilities library. 
 

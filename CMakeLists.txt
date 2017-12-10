@@ -4,6 +4,12 @@ project(vmu)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+endif()
+
 set(detail_header_files
         ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/query_range_using_query.inl
         ${CMAKE_CURRENT_SOURCE_DIR}/include/vmu/detail/address_cast.hpp
