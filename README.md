@@ -8,7 +8,7 @@ cross platform virtual memory utilities library.
 const auto region = vmu::query(address);
 if(region && region.protection().accessible()) {
     const auto new_flags = vmu::access::read_write_exec;
-    vmu::protection_guard(address, new_flags);
+    vmu::protection_guard guard(address, new_flags);
     // do something
 } // protection will be restored on scope exit
 ```
