@@ -107,7 +107,7 @@ namespace vmu {
                                              , Address address
                                              , std::error_code& ec)
     {
-        return detail::query_impl<RegionAddress>(::mach_task_self()
+        return detail::query_impl<RegionAddress>(handle
                                                  , address
                                                  , detail::handle_with_ec{ec});
     }

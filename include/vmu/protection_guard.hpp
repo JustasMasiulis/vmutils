@@ -17,6 +17,7 @@
 #ifndef VMU_PROTECTION_GUARD_HPP
 #define VMU_PROTECTION_GUARD_HPP
 
+#include <algorithm>
 #include "query.hpp"
 #include "protect.hpp"
 #include "address_concept.hpp"
