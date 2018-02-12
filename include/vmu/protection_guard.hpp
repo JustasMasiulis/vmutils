@@ -85,10 +85,17 @@ namespace vmu {
             const auto regions = query_range<std::uintptr_t>(begin, end);
             _old.reserve(regions.size());
             for (auto& region : regions) {
+                const auto region_begin =
+                    std::max(region.begin(),
+                             detail::address_cast_unchecked<std::uintptr_t>(begin));
+
+                // NOTE this might be bad on osx
+                const auto region_end =
+                    std::min(region.end(),
+                             detail::address_cast_unchecked<std::uintptr_t>(end));
+
                 _old.push_back(
-                    { std::max(region.begin(), detail::uintptr_cast(begin)),
-                      std::min(region.end(), detail::uintptr_cast(end)),
-                      region.protection().native() });
+                    { region_begin, region_end, region.protection().native() });
             }
 
             protect(begin, end, new_protection);

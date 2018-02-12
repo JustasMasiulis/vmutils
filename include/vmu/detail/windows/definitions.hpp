@@ -7,18 +7,18 @@ extern "C" struct _MEMORY_BASIC_INFORMATION;
 namespace vmu { namespace detail {
 
 #ifdef _WIN64
-    #if defined(__CYGWIN__)
+#if defined(__CYGWIN__)
     typedef unsigned long ULONG_PTR_;
-    #else
+#else
     typedef unsigned __int64 ULONG_PTR_;
-    #endif
+#endif
 #else
     typedef unsigned long ULONG_PTR_;
 #endif
 
     struct MEMORY_BASIC_INFORMATION_ {
-        void* BaseAddress;
-        void* AllocationBase;
+        void*         BaseAddress;
+        void*         AllocationBase;
         unsigned long AllocationProtect;
         ULONG_PTR_    RegionSize;
         unsigned long State;
@@ -32,11 +32,11 @@ namespace vmu { namespace detail {
             struct {
                 unsigned short wProcessorArchitecture;
                 unsigned short wReserved;
-            };
+            } info;
         };
-        unsigned long dwPageSize;
-        void* lpMinimumApplicationAddress;
-        void* lpMaximumApplicationAddress;
+        unsigned long  dwPageSize;
+        void*          lpMinimumApplicationAddress;
+        void*          lpMaximumApplicationAddress;
         ULONG_PTR_     dwActiveProcessorMask;
         unsigned long  dwNumberOfProcessors;
         unsigned long  dwProcessorType;
@@ -47,23 +47,27 @@ namespace vmu { namespace detail {
 
     extern "C" {
 
-        __declspec(dllimport) unsigned long __stdcall GetLastError();
+    __declspec(dllimport) unsigned long __stdcall GetLastError();
 
-        __declspec(dllimport) ULONG_PTR_ __stdcall 
-        VirtualQueryEx(void* handle, const void* address, ::_MEMORY_BASIC_INFORMATION* buffer, ULONG_PTR_ size_of_info);
+    __declspec(dllimport) ULONG_PTR_
+        __stdcall VirtualQueryEx(void*                        handle,
+                                 const void*                  address,
+                                 ::_MEMORY_BASIC_INFORMATION* buffer,
+                                 ULONG_PTR_                   size_of_info);
 
-        __declspec(dllimport) int __stdcall 
-        VirtualProtect(void* address, ULONG_PTR_ size, unsigned long new_protection, unsigned long* old_protection);
+    __declspec(dllimport) int __stdcall VirtualProtect(
+        void*          address,
+        ULONG_PTR_     size,
+        unsigned long  new_protection,
+        unsigned long* old_protection);
 
-        __declspec(dllimport) void __stdcall 
-        GetSystemInfo(::_SYSTEM_INFO* lpSystemInfo);
+    __declspec(dllimport) void __stdcall GetSystemInfo(::_SYSTEM_INFO* lpSystemInfo);
 
-        __declspec(dllimport) void* __stdcall
-        GetCurrentProcess();
+    __declspec(dllimport) void* __stdcall GetCurrentProcess();
 
-        __declspec(dllimport) int __stdcall 
-        FlushInstructionCache(void* handle, const void* address, ULONG_PTR_ size);
-
+    __declspec(dllimport) int __stdcall FlushInstructionCache(void*       handle,
+                                                              const void* address,
+                                                              ULONG_PTR_  size);
     }
 
     constexpr static unsigned long mem_commit  = 0x1000;
