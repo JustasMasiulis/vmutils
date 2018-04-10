@@ -22,7 +22,7 @@ Provides information about a memory region. Can be obtained using `query` or `qu
 | function      | return type                      | explanation                   |
 | ------------- |--------------------------------- | ----------------------------- |
 | begin         | Address                          | beginning of region           |
-| end           | Address                          | one pas the end of region     |
+| end           | Address                          | one past the end of region    |
 | size          | uint big enough to store Address | size of region                |
 | protection    | protection_t                     | the protection of page        |
 | guarded       | bool                             | whether the region is guarded |
@@ -80,7 +80,7 @@ constructor overloads:
 - `protection_guard(Range, protection_t, adopt_protection_t)`
 
 | function                    | explanation                                                             |
-| -------------               | ----------------------------------------------------------------------- |
+| --------------------------- | ----------------------------------------------------------------------- |
 | restore([std::error_code&]) | restores protection to its original state                               |
 | release                     | "releases" protection so it does not get restored on object destruction |
 
